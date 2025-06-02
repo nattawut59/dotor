@@ -1,0 +1,2488 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Treatment Management - Glaucoma Care System</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #324047;
+            --secondary: #00CECE;
+            --secondary-dark: #00A8A8;
+            --accent: #EFEFEF;
+            --white: #ffffff;
+            --dark: #2c3e50;
+            --gray: #7f8c8d;
+            --light: #f8f9fa;
+            --danger: #e74c3c;
+            --warning: #f39c12;
+            --success: #27ae60;
+            --info: #3498db;
+            --shadow: 0 8px 25px rgba(50, 64, 71, 0.1);
+            --shadow-lg: 0 15px 35px rgba(50, 64, 71, 0.15);
+            --radius: 20px;
+            --radius-sm: 12px;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, var(--accent) 0%, #d4e6f1 50%, #a8d8ea 100%);
+            background-attachment: fixed;
+            color: var(--dark);
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        /* Toast Notifications */
+        .toast-container {
+            position: fixed;
+            top: 2rem;
+            right: 2rem;
+            z-index: 10000;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .toast {
+            background: var(--white);
+            border: 1px solid rgba(50, 64, 71, 0.1);
+            border-radius: var(--radius-sm);
+            padding: 1rem 1.5rem;
+            box-shadow: var(--shadow-lg);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            min-width: 320px;
+            transform: translateX(400px);
+            transition: var(--transition);
+            border-left: 4px solid;
+        }
+
+        .toast.show {
+            transform: translateX(0);
+        }
+
+        .toast.toast-success {
+            border-left-color: var(--success);
+        }
+
+        .toast.toast-error {
+            border-left-color: var(--danger);
+        }
+
+        .toast.toast-info {
+            border-left-color: var(--info);
+        }
+
+        .toast.toast-warning {
+            border-left-color: var(--warning);
+        }
+
+        .toast-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1rem;
+        }
+
+        .toast-success .toast-icon {
+            background: var(--success);
+        }
+
+        .toast-error .toast-icon {
+            background: var(--danger);
+        }
+
+        .toast-info .toast-icon {
+            background: var(--info);
+        }
+
+        .toast-warning .toast-icon {
+            background: var(--warning);
+        }
+
+        .toast-content {
+            flex: 1;
+        }
+
+        .toast-title {
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+            color: var(--dark);
+        }
+
+        .toast-message {
+            font-size: 0.9rem;
+            color: var(--gray);
+        }
+
+        .toast-close {
+            background: none;
+            border: none;
+            color: var(--gray);
+            cursor: pointer;
+            padding: 0.25rem;
+            border-radius: 50%;
+            transition: var(--transition);
+        }
+
+        .toast-close:hover {
+            background: var(--accent);
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, var(--white), var(--accent));
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(50, 64, 71, 0.1);
+            box-shadow: var(--shadow);
+            padding: 1rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .header-content {
+            width: 100%;
+            padding: 0 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            text-decoration: none;
+            color: var(--primary);
+            font-size: 1.8rem;
+            font-weight: 800;
+        }
+
+        .logo i {
+            font-size: 2.2rem;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .breadcrumb {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--gray);
+            font-weight: 500;
+        }
+
+        .breadcrumb a {
+            color: var(--secondary);
+            text-decoration: none;
+            transition: var(--transition);
+        }
+
+        .breadcrumb a:hover {
+            color: var(--primary);
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .btn-back {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: var(--white);
+            border: none;
+            border-radius: var(--radius-sm);
+            padding: 0.75rem 1.5rem;
+            font-weight: 600;
+            text-decoration: none;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-back:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow);
+            color: var(--white);
+        }
+
+        /* Main Container */
+        .main-container {
+            width: 100%;
+            padding: 2rem;
+            min-height: calc(100vh - 120px);
+        }
+
+        /* Patient Selection */
+        .patient-selection {
+            background: var(--light);
+            border-radius: var(--radius-sm);
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            border: 1px solid rgba(50, 64, 71, 0.1);
+        }
+
+        .patient-card {
+            background: var(--white);
+            border-radius: var(--radius-sm);
+            padding: 1.5rem;
+            border: 2px solid rgba(50, 64, 71, 0.1);
+            transition: var(--transition);
+        }
+
+        .patient-card.selected {
+            border-color: var(--secondary);
+            box-shadow: 0 0 0 3px rgba(0, 206, 206, 0.1);
+        }
+
+        .patient-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .patient-name {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--dark);
+            margin-bottom: 0.5rem;
+        }
+
+        .patient-details {
+            color: var(--gray);
+            font-size: 0.9rem;
+        }
+
+        .btn-change-patient {
+            background: var(--secondary);
+            color: var(--white);
+            border: none;
+            border-radius: var(--radius-sm);
+            padding: 0.75rem 1.5rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .btn-change-patient:hover {
+            background: var(--secondary-dark);
+            transform: translateY(-2px);
+        }
+
+        /* Tab Navigation */
+        .tab-navigation {
+            background: linear-gradient(135deg, var(--white), var(--accent));
+            border-radius: var(--radius);
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(50, 64, 71, 0.1);
+        }
+
+        .tab-nav-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--dark);
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .tab-buttons {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1rem;
+        }
+
+        .tab-button {
+            background: var(--white);
+            border: 2px solid rgba(50, 64, 71, 0.1);
+            border-radius: var(--radius-sm);
+            padding: 1.5rem;
+            cursor: pointer;
+            transition: var(--transition);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .tab-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, var(--secondary), var(--secondary-dark));
+            transition: var(--transition);
+            z-index: -1;
+        }
+
+        .tab-button:hover,
+        .tab-button.active {
+            color: var(--white);
+            border-color: var(--secondary);
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .tab-button:hover::before,
+        .tab-button.active::before {
+            left: 0;
+        }
+
+        .tab-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            transition: var(--transition);
+        }
+
+        .tab-button:hover .tab-icon,
+        .tab-button.active .tab-icon {
+            transform: scale(1.1) rotate(5deg);
+        }
+
+        .tab-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .tab-description {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        /* Content Area */
+        .content-area {
+            background: linear-gradient(135deg, var(--white), var(--accent));
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(50, 64, 71, 0.1);
+            overflow: hidden;
+            min-height: 600px;
+        }
+
+        .content-header {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: var(--white);
+            padding: 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .content-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .content-actions {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .btn-primary {
+            background: var(--white);
+            color: var(--primary);
+            border: 2px solid var(--white);
+            border-radius: var(--radius-sm);
+            padding: 0.75rem 1.5rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary:hover {
+            background: transparent;
+            color: var(--white);
+            transform: translateY(-2px);
+        }
+
+        .content-body {
+            padding: 2rem;
+        }
+
+        /* Form Styles */
+        .form-section {
+            background: var(--white);
+            border-radius: var(--radius-sm);
+            padding: 2rem;
+            margin-bottom: 2rem;
+            border: 1px solid rgba(50, 64, 71, 0.1);
+            box-shadow: var(--shadow);
+        }
+
+        .section-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid var(--secondary);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .form-label {
+            font-weight: 600;
+            color: var(--dark);
+            font-size: 0.9rem;
+        }
+
+        .form-control {
+            background: var(--white);
+            border: 2px solid rgba(50, 64, 71, 0.1);
+            border-radius: var(--radius-sm);
+            padding: 0.75rem 1rem;
+            font-size: 1rem;
+            transition: var(--transition);
+            outline: none;
+        }
+
+        .form-control:focus {
+            border-color: var(--secondary);
+            box-shadow: 0 0 0 3px rgba(0, 206, 206, 0.1);
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+            margin-top: 2rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid rgba(50, 64, 71, 0.1);
+        }
+
+        .btn-save {
+            background: linear-gradient(135deg, var(--success), #229954);
+            color: var(--white);
+            border: none;
+            border-radius: var(--radius-sm);
+            padding: 0.75rem 2rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .btn-save:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow);
+        }
+
+        .btn-cancel {
+            background: var(--gray);
+            color: var(--white);
+            border: none;
+            border-radius: var(--radius-sm);
+            padding: 0.75rem 2rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .btn-cancel:hover {
+            background: var(--danger);
+            transform: translateY(-2px);
+        }
+
+        /* Timeline Styles */
+        .timeline {
+            position: relative;
+            padding-left: 2rem;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 1rem;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: var(--secondary);
+        }
+
+        .timeline-item {
+            position: relative;
+            background: var(--white);
+            border-radius: var(--radius-sm);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            margin-left: 1rem;
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(50, 64, 71, 0.1);
+        }
+
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -2rem;
+            top: 1.5rem;
+            width: 12px;
+            height: 12px;
+            background: var(--secondary);
+            border-radius: 50%;
+            border: 3px solid var(--white);
+            box-shadow: var(--shadow);
+        }
+
+        .record-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .record-date {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .record-type {
+            background: var(--secondary);
+            color: var(--white);
+            padding: 0.25rem 0.75rem;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .record-content {
+            color: var(--gray);
+            line-height: 1.6;
+            margin-bottom: 1rem;
+        }
+
+        .record-actions {
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        .btn-action {
+            background: transparent;
+            border: 2px solid var(--secondary);
+            color: var(--secondary);
+            border-radius: var(--radius-sm);
+            padding: 0.5rem 1rem;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .btn-action:hover {
+            background: var(--secondary);
+            color: var(--white);
+            transform: translateY(-2px);
+        }
+
+        /* Loading and Empty States */
+        .loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 3rem;
+            color: var(--gray);
+            font-size: 1.1rem;
+        }
+
+        .loading i {
+            animation: spin 1s linear infinite;
+            margin-right: 1rem;
+            font-size: 1.5rem;
+            color: var(--secondary);
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem 1rem;
+            color: var(--gray);
+        }
+
+        .empty-state i {
+            font-size: 4rem;
+            margin-bottom: 1.5rem;
+            opacity: 0.5;
+            color: var(--secondary);
+        }
+
+        .empty-state h3 {
+            margin-bottom: 1rem;
+            color: var(--dark);
+        }
+
+        .error-state {
+            text-align: center;
+            padding: 2rem 1rem;
+            color: var(--danger);
+            background: rgba(231, 76, 60, 0.1);
+            border-radius: var(--radius-sm);
+            margin: 1rem 0;
+        }
+
+        .error-state i {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(5px);
+            z-index: 9999;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.show {
+            display: flex;
+        }
+
+        .modal-content {
+            background: var(--white);
+            border-radius: var(--radius);
+            width: 90%;
+            max-width: 800px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: var(--shadow-lg);
+            animation: modalSlideIn 0.3s ease;
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: var(--white);
+            padding: 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: var(--white);
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 50%;
+            transition: var(--transition);
+        }
+
+        .modal-close:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .modal-body {
+            padding: 2rem;
+        }
+
+        /* Tab Content */
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1200px) {
+            .tab-buttons {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                gap: 1rem;
+                padding: 0 1rem;
+            }
+
+            .main-container {
+                padding: 1rem;
+            }
+
+            .tab-buttons {
+                grid-template-columns: 1fr;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .content-header {
+                flex-direction: column;
+                gap: 1rem;
+                text-align: center;
+            }
+
+            .content-actions {
+                flex-direction: column;
+                width: 100%;
+            }
+
+            .btn-primary {
+                justify-content: center;
+            }
+
+            .form-actions {
+                flex-direction: column;
+            }
+
+            .patient-info {
+                flex-direction: column;
+                gap: 1rem;
+                text-align: center;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .timeline {
+                padding-left: 1rem;
+            }
+
+            .timeline-item {
+                margin-left: 0.5rem;
+            }
+
+            .timeline-item::before {
+                left: -1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Toast Container -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <a href="dashboard.html" class="logo">
+                <i class="fas fa-eye"></i>
+                <span>Glaucoma Care</span>
+            </a>
+            
+            <div class="breadcrumb">
+                <a href="dashboard.html">แดชบอร์ด</a>
+                <i class="fas fa-chevron-right"></i>
+                <span>การรักษาและติดตาม</span>
+            </div>
+
+            <div class="header-actions">
+                <a href="dashboard.html" class="btn-back">
+                    <i class="fas fa-arrow-left"></i>
+                    <span>กลับหน้าหลัก</span>
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="main-container">
+        <!-- Patient Selection -->
+        <section class="patient-selection" id="patientSelection">
+            <h3 style="margin-bottom: 1rem; color: var(--primary); font-weight: 700;">
+                <i class="fas fa-user-md"></i> ผู้ป่วยที่เลือก
+            </h3>
+            <div id="selectedPatientCard">
+                <div class="loading">
+                    <i class="fas fa-spinner"></i>
+                    กำลังโหลดข้อมูลผู้ป่วย...
+                </div>
+            </div>
+        </section>
+
+        <!-- Tab Navigation -->
+        <section class="tab-navigation">
+            <h2 class="tab-nav-title">
+                <i class="fas fa-stethoscope"></i>
+                ระบบการรักษาและติดตาม
+            </h2>
+            <div class="tab-buttons">
+                <div class="tab-button active" data-tab="medication-management">
+                    <div class="tab-icon">
+                        <i class="fas fa-pills"></i>
+                    </div>
+                    <h3 class="tab-title">จัดการยาผู้ป่วย</h3>
+                    <p class="tab-description">สั่งยา, ปรับยา, และติดตามการใช้ยา</p>
+                </div>
+
+                <div class="tab-button" data-tab="iop-management">
+                    <div class="tab-icon">
+                        <i class="fas fa-eye"></i>
+                    </div>
+                    <h3 class="tab-title">บันทึก IOP</h3>
+                    <p class="tab-description">บันทึกความดันลูกตาและติดตามผล</p>
+                </div>
+
+                <div class="tab-button" data-tab="surgery-management">
+                    <div class="tab-icon">
+                        <i class="fas fa-procedures"></i>
+                    </div>
+                    <h3 class="tab-title">การผ่าตัด</h3>
+                    <p class="tab-description">บันทึกการผ่าตัดและการดูแลหลังผ่าตัด</p>
+                </div>
+
+                <div class="tab-button" data-tab="treatment-plan">
+                    <div class="tab-icon">
+                        <i class="fas fa-clipboard-list"></i>
+                    </div>
+                    <h3 class="tab-title">แผนการรักษา</h3>
+                    <p class="tab-description">วางแผนการรักษาและติดตามผล</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Content Area -->
+        <div class="content-area">
+            <!-- Medication Management Tab -->
+            <div id="medication-management" class="tab-content active">
+                <div class="content-header">
+                    <h2 class="content-title">
+                        <i class="fas fa-pills"></i>
+                        จัดการยาผู้ป่วย
+                    </h2>
+                    <div class="content-actions">
+                        <button class="btn-primary" onclick="refreshMedications()">
+                            <i class="fas fa-sync-alt"></i>
+                            รีเฟรช
+                        </button>
+                    </div>
+                </div>
+                <div class="content-body">
+                    <!-- Add Medication Form -->
+                    <form id="addMedicationForm" onsubmit="submitMedication(event)">
+                        <div class="form-section">
+                            <h3 class="section-title">
+                                <i class="fas fa-plus"></i>
+                                สั่งยาใหม่
+                            </h3>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label class="form-label">ชื่อยา *</label>
+                                    <input type="text" class="form-control" name="medicationName" required placeholder="เช่น Latanoprost">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">ชื่อสามัญ</label>
+                                    <input type="text" class="form-control" name="genericName" placeholder="ชื่อสามัญของยา">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">หมวดยา</label>
+                                    <select class="form-control" name="category">
+                                        <option value="">เลือกหมวดยา</option>
+                                        <option value="prostaglandin">Prostaglandin Analogs</option>
+                                        <option value="beta-blocker">Beta Blockers</option>
+                                        <option value="alpha-agonist">Alpha Agonists</option>
+                                        <option value="carbonic-anhydrase">Carbonic Anhydrase Inhibitors</option>
+                                        <option value="combination">ยาผสม</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label class="form-label">รูปแบบยา</label>
+                                    <select class="form-control" name="form">
+
+                                <div class="form-group">
+                                    <label class="form-label">รูปแบบยา</label>
+                                    <select class="form-control" name="form">
+                                        <option value="">เลือกรูปแบบ</option>
+                                        <option value="eye-drops">ยาหยอดตา</option>
+                                        <option value="gel">เจล</option>
+                                        <option value="ointment">ยาขี้ผึ้ง</option>
+                                        <option value="tablet">ยาเม็ด</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">ความแรง</label>
+                                    <input type="text" class="form-control" name="strength" placeholder="เช่น 0.005%">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">ตาที่ใช้ *</label>
+                                    <select class="form-control" name="eye" required>
+                                        <option value="">เลือกตา</option>
+                                        <option value="both">ทั้งสองข้าง</option>
+                                        <option value="right">ตาขวา</option>
+                                        <option value="left">ตาซ้าย</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label class="form-label">ขนาดยา *</label>
+                                    <input type="text" class="form-control" name="dosage" required placeholder="เช่น 1 หยด">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">ความถี่ *</label>
+                                    <select class="form-control" name="frequency" required>
+                                        <option value="">เลือกความถี่</option>
+                                        <option value="once_daily">วันละ 1 ครั้ง</option>
+                                        <option value="twice_daily">วันละ 2 ครั้ง</option>
+                                        <option value="three_times_daily">วันละ 3 ครั้ง</option>
+                                        <option value="four_times_daily">วันละ 4 ครั้ง</option>
+                                        <option value="every_6_hours">ทุก 6 ชั่วโมง</option>
+                                        <option value="every_8_hours">ทุก 8 ชั่วโมง</option>
+                                        <option value="every_12_hours">ทุก 12 ชั่วโมง</option>
+                                        <option value="as_needed">เมื่อจำเป็น</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">ระยะเวลาการใช้ (วัน)</label>
+                                    <input type="number" class="form-control" name="duration" min="1" placeholder="จำนวนวัน">
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label class="form-label">จำนวนที่จ่าย</label>
+                                    <input type="number" class="form-control" name="quantityDispensed" min="1" placeholder="จำนวน">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">จำนวนครั้งที่สามารถต่อยาได้</label>
+                                    <input type="number" class="form-control" name="refills" min="0" max="5" placeholder="0-5">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">คำแนะนำพิเศษ</label>
+                                <textarea class="form-control" name="specialInstructions" rows="3" placeholder="คำแนะนำเพิ่มเติมเกี่ยวกับการใช้ยา"></textarea>
+                            </div>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="button" class="btn-cancel" onclick="clearMedicationForm()">
+                                <i class="fas fa-times"></i>
+                                ล้างข้อมูล
+                            </button>
+                            <button type="submit" class="btn-save">
+                                <i class="fas fa-save"></i>
+                                สั่งยา
+                            </button>
+                        </div>
+                    </form>
+
+                    <!-- Current Medications -->
+                    <div class="form-section">
+                        <h3 class="section-title">
+                            <i class="fas fa-list"></i>
+                            ยาที่ใช้อยู่ปัจจุบัน
+                        </h3>
+                        <div id="currentMedicationsContainer">
+                            <div class="loading">
+                                <i class="fas fa-spinner"></i>
+                                กำลังโหลดข้อมูลยา...
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- IOP Management Tab -->
+            <div id="iop-management" class="tab-content">
+                <div class="content-header">
+                    <h2 class="content-title">
+                        <i class="fas fa-eye"></i>
+                        บันทึกความดันลูกตา (IOP)
+                    </h2>
+                    <div class="content-actions">
+                        <button class="btn-primary" onclick="refreshIOPData()">
+                            <i class="fas fa-sync-alt"></i>
+                            รีเฟรช
+                        </button>
+                    </div>
+                </div>
+                <div class="content-body">
+                    <!-- Add IOP Form -->
+                    <form id="addIOPForm" onsubmit="submitIOP(event)">
+                        <div class="form-section">
+                            <h3 class="section-title">
+                                <i class="fas fa-plus"></i>
+                                บันทึกค่า IOP ใหม่
+                            </h3>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label class="form-label">วันที่วัด *</label>
+                                    <input type="date" class="form-control" name="measurementDate" required>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">เวลาที่วัด *</label>
+                                    <input type="time" class="form-control" name="measurementTime" required>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">เครื่องมือที่ใช้วัด</label>
+                                    <select class="form-control" name="measurementDevice">
+                                        <option value="">เลือกเครื่องมือ</option>
+                                        <option value="goldmann">Goldmann Applanation Tonometer</option>
+                                        <option value="pneumatic">Pneumatic Tonometer</option>
+                                        <option value="rebound">Rebound Tonometer</option>
+                                        <option value="handheld">Handheld Tonometer</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label class="form-label">IOP ตาขวา (mmHg) *</label>
+                                    <input type="number" class="form-control" name="rightEyeIOP" step="0.1" min="0" max="50" required>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">IOP ตาซ้าย (mmHg) *</label>
+                                    <input type="number" class="form-control" name="leftEyeIOP" step="0.1" min="0" max="50" required>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">วิธีการวัด</label>
+                                    <select class="form-control" name="measurementMethod">
+                                        <option value="">เลือกวิธีการ</option>
+                                        <option value="contact">Contact Method</option>
+                                        <option value="non-contact">Non-contact Method</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">หมายเหตุ</label>
+                                <textarea class="form-control" name="notes" rows="3" placeholder="หมายเหตุเพิ่มเติม เช่น อาการของผู้ป่วย, สภาพแวดล้อมในการวัด"></textarea>
+                            </div>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="button" class="btn-cancel" onclick="clearIOPForm()">
+                                <i class="fas fa-times"></i>
+                                ล้างข้อมูล
+                            </button>
+                            <button type="submit" class="btn-save">
+                                <i class="fas fa-save"></i>
+                                บันทึก IOP
+                            </button>
+                        </div>
+                    </form>
+
+                    <!-- IOP History -->
+                    <div class="form-section">
+                        <h3 class="section-title">
+                            <i class="fas fa-chart-line"></i>
+                            ประวัติค่า IOP
+                        </h3>
+                        <div id="iopHistoryContainer">
+                            <div class="loading">
+                                <i class="fas fa-spinner"></i>
+                                กำลังโหลดประวัติ IOP...
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Surgery Management Tab -->
+            <div id="surgery-management" class="tab-content">
+                <div class="content-header">
+                    <h2 class="content-title">
+                        <i class="fas fa-procedures"></i>
+                        การผ่าตัด Glaucoma
+                    </h2>
+                    <div class="content-actions">
+                        <button class="btn-primary" onclick="refreshSurgeries()">
+                            <i class="fas fa-sync-alt"></i>
+                            รีเฟรช
+                        </button>
+                    </div>
+                </div>
+                <div class="content-body">
+                    <!-- Add Surgery Form -->
+                    <form id="addSurgeryForm" onsubmit="submitSurgery(event)">
+                        <div class="form-section">
+                            <h3 class="section-title">
+                                <i class="fas fa-plus"></i>
+                                บันทึกการผ่าตัดใหม่
+                            </h3>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label class="form-label">วันที่ผ่าตัด *</label>
+                                    <input type="date" class="form-control" name="surgeryDate" required>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">ประเภทการผ่าตัด *</label>
+                                    <select class="form-control" name="surgeryType" required>
+                                        <option value="">เลือกประเภท</option>
+                                        <option value="trabeculectomy">Trabeculectomy</option>
+                                        <option value="tube_shunt">Tube Shunt Surgery</option>
+                                        <option value="laser_trabeculoplasty">Laser Trabeculoplasty</option>
+                                        <option value="cyclophotocoagulation">Cyclophotocoagulation</option>
+                                        <option value="migs">MIGS (Minimally Invasive Glaucoma Surgery)</option>
+                                        <option value="other">อื่นๆ</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">ตาที่ผ่าตัด *</label>
+                                    <select class="form-control" name="eye" required>
+                                        <option value="">เลือกตา</option>
+                                        <option value="right">ตาขวา</option>
+                                        <option value="left">ตาซ้าย</option>
+                                        <option value="both">ทั้งสองข้าง</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label class="form-label">IOP ก่อนผ่าตัด - ตาขวา (mmHg)</label>
+                                    <input type="number" class="form-control" name="preOpIOPRight" step="0.1" min="0" max="50">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">IOP ก่อนผ่าตัด - ตาซ้าย (mmHg)</label>
+                                    <input type="number" class="form-control" name="preOpIOPLeft" step="0.1" min="0" max="50">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">รายละเอียดขั้นตอนการผ่าตัด</label>
+                                <textarea class="form-control" name="procedureDetails" rows="4" placeholder="อธิบายขั้นตอนการผ่าตัด, เทคนิคที่ใช้, อุปกรณ์พิเศษ"></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">ภาวะแทรกซ้อน (ถ้ามี)</label>
+                                <textarea class="form-control" name="complications" rows="3" placeholder="ภาวะแทรกซ้อนที่เกิดขึ้นระหว่างหรือหลังผ่าตัด"></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">การดูแลหลังผ่าตัด</label>
+                                <textarea class="form-control" name="postOpCare" rows="3" placeholder="คำแนะนำการดูแลหลังผ่าตัด, ยาที่ต้องใช้, ข้อห้าม"></textarea>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label class="form-label">ผลการผ่าตัด</label>
+                                    <select class="form-control" name="outcome">
+                                        <option value="">ยังไม่ประเมิน</option>
+                                        <option value="excellent">ดีเยี่ยม</option>
+                                        <option value="good">ดี</option>
+                                        <option value="fair">พอใช้</option>
+                                        <option value="poor">ไม่ดี</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">แผนการติดตาม</label>
+                                    <input type="text" class="form-control" name="followUpPlan" placeholder="เช่น ติดตาม 1 สัปดาห์, 1 เดือน, 3 เดือน">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">หมายเหตุเพิ่มเติม</label>
+                                <textarea class="form-control" name="notes" rows="2" placeholder="หมายเหตุเพิ่มเติม"></textarea>
+                            </div>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="button" class="btn-cancel" onclick="clearSurgeryForm()">
+                                <i class="fas fa-times"></i>
+                                ล้างข้อมูล
+                            </button>
+                            <button type="submit" class="btn-save">
+                                <i class="fas fa-save"></i>
+                                บันทึกการผ่าตัด
+                            </button>
+                        </div>
+                    </form>
+
+                    <!-- Surgery History -->
+                    <div class="form-section">
+                        <h3 class="section-title">
+                            <i class="fas fa-history"></i>
+                            ประวัติการผ่าตัด
+                        </h3>
+                        <div id="surgeryHistoryContainer">
+                            <div class="loading">
+                                <i class="fas fa-spinner"></i>
+                                กำลังโหลดประวัติการผ่าตัด...
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Treatment Plan Tab -->
+            <div id="treatment-plan" class="tab-content">
+                <div class="content-header">
+                    <h2 class="content-title">
+                        <i class="fas fa-clipboard-list"></i>
+                        แผนการรักษา Glaucoma
+                    </h2>
+                    <div class="content-actions">
+                        <button class="btn-primary" onclick="refreshTreatmentPlan()">
+                            <i class="fas fa-sync-alt"></i>
+                            รีเฟรช
+                        </button>
+                    </div>
+                </div>
+                <div class="content-body">
+                    <!-- Treatment Plan Form -->
+                    <form id="treatmentPlanForm" onsubmit="submitTreatmentPlan(event)">
+                        <div class="form-section">
+                            <h3 class="section-title">
+                                <i class="fas fa-plus"></i>
+                                วางแผนการรักษาใหม่
+                            </h3>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label class="form-label">แนวทางการรักษา *</label>
+                                    <select class="form-control" name="treatmentApproach" required>
+                                        <option value="">เลือกแนวทาง</option>
+                                        <option value="medical">การรักษาด้วยยา</option>
+                                        <option value="laser">การรักษาด้วย Laser</option>
+                                        <option value="surgical">การผ่าตัด</option>
+                                        <option value="combination">การรักษาแบบผสมผสาน</option>
+                                        <option value="observation">การสังเกตอาการ</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Target IOP ตาขวา (mmHg)</label>
+                                    <input type="number" class="form-control" name="targetIOPRight" step="0.1" min="0" max="30" placeholder="เป้าหมาย IOP">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Target IOP ตาซ้าย (mmHg)</label>
+                                    <input type="number" class="form-control" name="targetIOPLeft" step="0.1" min="0" max="30" placeholder="เป้าหมาย IOP">
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label class="form-label">ความถี่ในการติดตาม</label>
+                                    <select class="form-control" name="followUpFrequency">
+                                        <option value="">เลือกความถี่</option>
+                                        <option value="weekly">ทุกสัปดาห์</option>
+                                        <option value="biweekly">ทุก 2 สัปดาห์</option>
+                                        <option value="monthly">ทุกเดือน</option>
+                                        <option value="bimonthly">ทุก 2 เดือน</option>
+                                        <option value="quarterly">ทุก 3 เดือน</option>
+                                        <option value="biannually">ทุก 6 เดือน</option>
+                                        <option value="annually">ทุกปี</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">ความถี่การตรวจ Visual Field</label>
+                                    <select class="form-control" name="visualFieldTestFrequency">
+                                        <option value="">เลือกความถี่</option>
+                                        <option value="monthly">ทุกเดือน</option>
+                                        <option value="bimonthly">ทุก 2 เดือน</option>
+                                        <option value="quarterly">ทุก 3 เดือน</option>
+                                        <option value="biannually">ทุก 6 เดือน</option>
+                                        <option value="annually">ทุกปี</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">หมายเหตุแผนการรักษา</label>
+                                <textarea class="form-control" name="notes" rows="4" placeholder="รายละเอียดแผนการรักษา, เป้าหมาย, ข้อควรระวัง"></textarea>
+                            </div>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="button" class="btn-cancel" onclick="clearTreatmentPlanForm()">
+                                <i class="fas fa-times"></i>
+                                ล้างข้อมูล
+                            </button>
+                            <button type="submit" class="btn-save">
+                                <i class="fas fa-save"></i>
+                                บันทึกแผนการรักษา
+                            </button>
+                        </div>
+                    </form>
+
+                    <!-- Current Treatment Plan -->
+                    <div class="form-section">
+                        <h3 class="section-title">
+                            <i class="fas fa-list-alt"></i>
+                            แผนการรักษาปัจจุบัน
+                        </h3>
+                        <div id="currentTreatmentPlanContainer">
+                            <div class="loading">
+                                <i class="fas fa-spinner"></i>
+                                กำลังโหลดแผนการรักษา...
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Patient Selection Modal -->
+    <div id="patientSelectionModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">เลือกผู้ป่วย</h3>
+                <button class="modal-close" onclick="closePatientSelectionModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label">ค้นหาผู้ป่วย</label>
+                    <input type="text" class="form-control" id="modalSearchInput" placeholder="ชื่อ, นามสกุล, HN">
+                </div>
+                <div id="modalPatientList" style="max-height: 400px; overflow-y: auto;">
+                    <div class="loading">
+                        <i class="fas fa-spinner"></i>
+                        กำลังโหลดรายชื่อผู้ป่วย...
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // API Configuration
+        const API_BASE_URL = 'http://localhost:3000/api';
+        
+        // Global state
+        let selectedPatient = null;
+        let currentTab = 'medication-management';
+        let doctorPatients = [];
+
+        // Toast Notification System
+        function showToast(message, type = 'info', duration = 5000) {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = `toast toast-${type}`;
+            
+            const icons = {
+                success: 'fas fa-check',
+                error: 'fas fa-times',
+                info: 'fas fa-info',
+                warning: 'fas fa-exclamation-triangle'
+            };
+
+            const titles = {
+                success: 'สำเร็จ',
+                error: 'เกิดข้อผิดพลาด',
+                info: 'แจ้งเตือน',
+                warning: 'คำเตือน'
+            };
+            
+            toast.innerHTML = `
+                <div class="toast-icon">
+                    <i class="${icons[type]}"></i>
+                </div>
+                <div class="toast-content">
+                    <div class="toast-title">${titles[type]}</div>
+                    <div class="toast-message">${message}</div>
+                </div>
+                <button class="toast-close" onclick="closeToast(this)">
+                    <i class="fas fa-times"></i>
+                </button>
+            `;
+            
+            container.appendChild(toast);
+            
+            // Show toast
+            setTimeout(() => {
+                toast.classList.add('show');
+            }, 100);
+            
+            // Auto hide
+            setTimeout(() => {
+                closeToast(toast.querySelector('.toast-close'));
+            }, duration);
+        }
+
+        function closeToast(button) {
+            const toast = button.closest('.toast');
+            toast.classList.remove('show');
+            setTimeout(() => {
+                toast.remove();
+            }, 300);
+        }
+
+        // API Helper Functions
+        async function apiCall(endpoint, options = {}) {
+            try {
+                const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
+                        ...options.headers
+                    },
+                    ...options
+                });
+                
+                if (!response.ok) {
+                    if (response.status === 401) {
+                        showToast('เซสชันหมดอายุ กรุณาเข้าสู่ระบบใหม่', 'error');
+                        setTimeout(() => {
+                            window.location.href = 'doctor-login.html';
+                        }, 2000);
+                        return null;
+                    }
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                return await response.json();
+            } catch (error) {
+                console.error('API call failed:', error);
+                throw error;
+            }
+        }
+
+        // Initialize Application
+        async function initializeApp() {
+            try {
+                console.log('🚀 Initializing Treatment Management...');
+                
+                // Check if patient was selected from another page
+                const selectedPatientId = localStorage.getItem('selectedPatientId');
+                if (selectedPatientId) {
+                    console.log('📋 Found selected patient ID:', selectedPatientId);
+                    await loadSelectedPatient(selectedPatientId);
+                    // Clear the stored ID after loading
+                    localStorage.removeItem('selectedPatientId');
+                } else {
+                    console.log('👥 No pre-selected patient, loading doctor\'s patients...');
+                    await loadDoctorPatients();
+                }
+                
+                initializeTabs();
+                setTodayDate();
+                
+            } catch (error) {
+                console.error('❌ Failed to initialize app:', error);
+                showToast('เกิดข้อผิดพลาดในการโหลดข้อมูล', 'error');
+            }
+        }
+
+        // Load specific patient (from localStorage)
+        async function loadSelectedPatient(patientId) {
+            try {
+                console.log('👤 Loading selected patient:', patientId);
+                updateSelectedPatientDisplay('loading');
+                
+                const patient = await apiCall(`/patients/${patientId}`);
+                if (patient) {
+                    selectedPatient = patient;
+                    updateSelectedPatientDisplay();
+                    loadTabContent();
+                    showToast(`โหลดข้อมูลผู้ป่วย: ${patient.first_name} ${patient.last_name}`, 'success');
+                } else {
+                    throw new Error('ไม่พบข้อมูลผู้ป่วย');
+                }
+                
+            } catch (error) {
+                console.error('❌ Failed to load selected patient:', error);
+                showToast('ไม่สามารถโหลดข้อมูลผู้ป่วยได้', 'error');
+                await loadDoctorPatients(); // Fallback to patient selection
+            }
+        }
+
+        
+        // Load all patients in the system (not just doctor's assigned patients)
+        async function loadAllPatients() {
+            try {
+                console.log('👥 Loading all patients in system...');
+                updateSelectedPatientDisplay('loading');
+                
+                const patients = await apiCall('/patients');
+                doctorPatients = patients || [];
+                
+                if (doctorPatients.length === 0) {
+                    updateSelectedPatientDisplay('empty');
+                    showToast('ไม่มีผู้ป่วยในระบบ', 'info');
+                    return;
+                }
+                
+                // Show patient selection if no patient is pre-selected
+                updateSelectedPatientDisplay('select');
+                console.log(`✅ Loaded ${doctorPatients.length} patients from system`);
+                
+            } catch (error) {
+                console.error('❌ Failed to load patients:', error);
+                updateSelectedPatientDisplay('error');
+                showToast('ไม่สามารถโหลดรายชื่อผู้ป่วยได้', 'error');
+            }
+        }
+
+        // Update patient display based on state
+        function updateSelectedPatientDisplay(state = null) {
+            const container = document.getElementById('selectedPatientCard');
+            
+            if (state === 'loading') {
+                container.innerHTML = `
+                    <div class="loading">
+                        <i class="fas fa-spinner"></i>
+                        กำลังโหลดข้อมูลผู้ป่วย...
+                    </div>
+                `;
+                return;
+            }
+            
+            if (state === 'empty') {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-user-times"></i>
+                        <h3>ไม่มีผู้ป่วยในระบบ</h3>
+                        <p>ยังไม่มีผู้ป่วยในระบบ</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            if (state === 'error') {
+                container.innerHTML = `
+                    <div class="error-state">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <h3>เกิดข้อผิดพลาด</h3>
+                        <p>ไม่สามารถโหลดข้อมูลผู้ป่วยได้</p>
+                        <button class="btn-primary" onclick="loadDoctorPatients()">
+                            <i class="fas fa-sync-alt"></i>
+                            ลองใหม่
+                        </button>
+                    </div>
+                `;
+                return;
+            }
+            
+            if (state === 'select') {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-user-circle"></i>
+                        <h3>เลือกผู้ป่วยเพื่อเริ่มการรักษา</h3>
+                        <p>กรุณาเลือกผู้ป่วยจากรายชื่อเพื่อเริ่มบันทึกการรักษา</p>
+                        <button class="btn-primary" onclick="showPatientSelectionModal()">
+                            <i class="fas fa-search"></i>
+                            เลือกผู้ป่วย (${doctorPatients.length} คน)
+                        </button>
+                    </div>
+                `;
+                return;
+            }
+
+            if (!selectedPatient) {
+                updateSelectedPatientDisplay('select');
+                return;
+            }
+
+            // Display selected patient
+            container.innerHTML = `
+                <div class="patient-card selected">
+                    <div class="patient-info">
+                        <div>
+                            <div class="patient-name">${selectedPatient.first_name} ${selectedPatient.last_name}</div>
+                            <div class="patient-details">
+                                HN: ${selectedPatient.hn || 'N/A'} • อายุ ${calculateAge(selectedPatient.date_of_birth)} ปี • 
+                                ${getGenderText(selectedPatient.gender)} • เบอร์: ${selectedPatient.phone || 'ไม่ระบุ'}
+                            </div>
+                        </div>
+                        <div>
+                            <button class="btn-change-patient" onclick="showPatientSelectionModal()">
+                                <i class="fas fa-exchange-alt"></i>
+                                เปลี่ยนผู้ป่วย
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Patient Selection Modal Functions
+        function showPatientSelectionModal() {
+            document.getElementById('patientSelectionModal').classList.add('show');
+            displayModalPatients(doctorPatients);
+        }
+
+        function closePatientSelectionModal() {
+            document.getElementById('patientSelectionModal').classList.remove('show');
+        }
+
+        function displayModalPatients(patients) {
+            const container = document.getElementById('modalPatientList');
+            
+            if (!patients || patients.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-users"></i>
+                        <h3>ไม่มีผู้ป่วย</h3>
+                        <p>ไม่มีผู้ป่วยภายใต้การดูแล</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            container.innerHTML = patients.map(patient => `
+                <div class="patient-card" onclick="selectPatient('${patient.patient_id}')" style="cursor: pointer; margin-bottom: 1rem;">
+                    <div class="patient-info">
+                        <div>
+                            <div class="patient-name">${patient.first_name} ${patient.last_name}</div>
+                            <div class="patient-details">
+                                HN: ${patient.hn || 'N/A'} • อายุ ${calculateAge(patient.date_of_birth)} ปี • ${getGenderText(patient.gender)}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function selectPatient(patientId) {
+            const patient = doctorPatients.find(p => p.patient_id === patientId);
+            if (patient) {
+                selectedPatient = patient;
+                updateSelectedPatientDisplay();
+                closePatientSelectionModal();
+                showToast(`เลือกผู้ป่วย: ${patient.first_name} ${patient.last_name}`, 'success');
+                
+                // Set today's date and load tab content
+                setTodayDate();
+                loadTabContent();
+            }
+        }
+
+        // Tab Management
+        function initializeTabs() {
+            const tabButtons = document.querySelectorAll('.tab-button');
+
+            tabButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    const tabId = button.getAttribute('data-tab');
+                    switchTab(tabId);
+                });
+            });
+        }
+
+        function switchTab(tabId) {
+            currentTab = tabId;
+            
+            // Update button states
+            document.querySelectorAll('.tab-button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.querySelector(`[data-tab="${tabId}"]`).classList.add('active');
+
+            // Update content visibility
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+                content.style.display = 'none';
+            });
+            
+            const activeContent = document.getElementById(tabId);
+            activeContent.classList.add('active');
+            activeContent.style.display = 'block';
+
+            // Load content for current tab
+            loadTabContent();
+        }
+
+        function loadTabContent() {
+            if (!selectedPatient) return;
+            
+            switch(currentTab) {
+                case 'medication-management':
+                    loadCurrentMedications();
+                    break;
+                case 'iop-management':
+                    loadIOPHistory();
+                    break;
+                case 'surgery-management':
+                    loadSurgeryHistory();
+                    break;
+                case 'treatment-plan':
+                    loadCurrentTreatmentPlan();
+                    break;
+            }
+        }
+
+        // Medication Management Functions
+        async function loadCurrentMedications() {
+            const container = document.getElementById('currentMedicationsContainer');
+            
+            if (!selectedPatient) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-pills"></i>
+                        <h3>กรุณาเลือกผู้ป่วย</h3>
+                        <p>เลือกผู้ป่วยเพื่อดูยาที่ใช้อยู่</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            try {
+                container.innerHTML = `
+                    <div class="loading">
+                        <i class="fas fa-spinner"></i>
+                        กำลังโหลดข้อมูลยา...
+                    </div>
+                `;
+
+                const medications = await apiCall(`/patients/${selectedPatient.patient_id}/medications`);
+                
+                if (!medications || medications.length === 0) {
+                    container.innerHTML = `
+                        <div class="empty-state">
+                            <i class="fas fa-pills"></i>
+                            <h3>ไม่มีข้อมูลยา</h3>
+                            <p>ผู้ป่วยยังไม่มีการสั่งยา</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                displayMedications(medications);
+                
+            } catch (error) {
+                console.error('Failed to load medications:', error);
+                container.innerHTML = `
+                    <div class="error-state">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <h3>ไม่สามารถโหลดข้อมูลยาได้</h3>
+                        <p>เกิดข้อผิดพลาดในการโหลดข้อมูล</p>
+                        <button class="btn-primary" onclick="loadCurrentMedications()">ลองใหม่</button>
+                    </div>
+                `;
+            }
+        }
+
+        function displayMedications(medications) {
+            const container = document.getElementById('currentMedicationsContainer');
+            
+            container.innerHTML = medications.map(med => `
+                <div class="timeline-item" style="margin-left: 0;">
+                    <div class="record-header">
+                        <span class="record-date">${med.medication_name}</span>
+                        <span class="record-type" style="background: ${med.status === 'active' ? 'var(--success)' : 'var(--gray)'}">
+                            ${getStatusText(med.status)}
+                        </span>
+                    </div>
+                    <div class="record-content">
+                        <p><strong>ชื่อสามัญ:</strong> ${med.generic_name || 'ไม่ระบุ'}</p>
+                        <p><strong>ตาที่ใช้:</strong> ${getEyeText(med.eye)}</p>
+                        <p><strong>ขนาดยา:</strong> ${med.dosage}</p>
+                        <p><strong>ความถี่:</strong> ${getFrequencyText(med.frequency)}</p>
+                        <p><strong>เริ่มใช้:</strong> ${formatDate(med.start_date)}</p>
+                        ${med.end_date ? `<p><strong>สิ้นสุด:</strong> ${formatDate(med.end_date)}</p>` : ''}
+                        ${med.special_instructions ? `<p><strong>คำแนะนำ:</strong> ${med.special_instructions}</p>` : ''}
+                        <p><strong>แพทย์ผู้สั่ง:</strong> ${med.prescribed_by || 'ไม่ระบุ'}</p>
+                    </div>
+                    ${med.status === 'active' ? `
+                        <div class="record-actions">
+                            <button class="btn-action" onclick="editMedication('${med.prescription_id}')">
+                                <i class="fas fa-edit"></i> แก้ไข
+                            </button>
+                            <button class="btn-action" onclick="discontinueMedication('${med.prescription_id}')">
+                                <i class="fas fa-stop"></i> หยุดยา
+                            </button>
+                        </div>
+                    ` : ''}
+                </div>
+            `).join('');
+        }
+
+        async function submitMedication(event) {
+            event.preventDefault();
+            
+            if (!selectedPatient) {
+                showToast('กรุณาเลือกผู้ป่วยก่อนสั่งยา', 'error');
+                return;
+            }
+
+            const formData = new FormData(event.target);
+            const medicationData = Object.fromEntries(formData.entries());
+            
+            try {
+                showToast('กำลังบันทึกข้อมูลยา...', 'info');
+                
+                const response = await apiCall(`/patients/${selectedPatient.patient_id}/medications`, {
+                    method: 'POST',
+                    body: JSON.stringify(medicationData)
+                });
+
+                if (response) {
+                    showToast('สั่งยาเรียบร้อยแล้ว', 'success');
+                    clearMedicationForm();
+                    loadCurrentMedications();
+                }
+                
+            } catch (error) {
+                console.error('Failed to add medication:', error);
+                showToast('ไม่สามารถสั่งยาได้ กรุณาลองใหม่', 'error');
+            }
+        }
+
+        async function discontinueMedication(prescriptionId) {
+            if (!confirm('ต้องการหยุดยานี้หรือไม่?')) return;
+            
+            try {
+                const reason = prompt('เหตุผลในการหยุดยา:') || 'หยุดโดยแพทย์';
+                
+                await apiCall(`/medications/${prescriptionId}`, {
+                    method: 'DELETE',
+                    body: JSON.stringify({ reason })
+                });
+
+                showToast('หยุดยาเรียบร้อยแล้ว', 'success');
+                loadCurrentMedications();
+                
+            } catch (error) {
+                console.error('Failed to discontinue medication:', error);
+                showToast('ไม่สามารถหยุดยาได้', 'error');
+            }
+        }
+
+        // IOP Management Functions
+        async function loadIOPHistory() {
+            const container = document.getElementById('iopHistoryContainer');
+            
+            if (!selectedPatient) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-eye"></i>
+                        <h3>กรุณาเลือกผู้ป่วย</h3>
+                        <p>เลือกผู้ป่วยเพื่อดูประวัติ IOP</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            try {
+                container.innerHTML = `
+                    <div class="loading">
+                        <i class="fas fa-spinner"></i>
+                        กำลังโหลดประวัติ IOP...
+                    </div>
+                `;
+
+                const iopData = await apiCall(`/patients/${selectedPatient.patient_id}/iop-measurements`);
+                
+                if (!iopData || !iopData.measurements || iopData.measurements.length === 0) {
+                    container.innerHTML = `
+                        <div class="empty-state">
+                            <i class="fas fa-chart-line"></i>
+                            <h3>ไม่มีประวัติ IOP</h3>
+                            <p>ยังไม่มีการบันทึกค่า IOP</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                displayIOPHistory(iopData.measurements, iopData.statistics);
+                
+            } catch (error) {
+                console.error('Failed to load IOP history:', error);
+                container.innerHTML = `
+                    <div class="error-state">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <h3>ไม่สามารถโหลดประวัติ IOP ได้</h3>
+                        <button class="btn-primary" onclick="loadIOPHistory()">ลองใหม่</button>
+                    </div>
+                `;
+            }
+        }
+
+        function displayIOPHistory(measurements, statistics) {
+            const container = document.getElementById('iopHistoryContainer');
+            
+            let html = '';
+            
+            // Show statistics if available
+            if (statistics && statistics.total_measurements > 0) {
+                html += `
+                    <div style="background: var(--light); padding: 1rem; border-radius: var(--radius-sm); margin-bottom: 1rem;">
+                        <h4 style="color: var(--primary); margin-bottom: 0.5rem;">สถิติค่า IOP</h4>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem;">
+                            <div><strong>จำนวนครั้ง:</strong> ${statistics.total_measurements}</div>
+                            <div><strong>เฉลี่ย ตาขวา:</strong> ${parseFloat(statistics.avg_right_iop || 0).toFixed(1)} mmHg</div>
+                            <div><strong>เฉลี่ย ตาซ้าย:</strong> ${parseFloat(statistics.avg_left_iop || 0).toFixed(1)} mmHg</div>
+                            <div><strong>สูงสุด ตาขวา:</strong> ${statistics.max_right_iop || 0} mmHg</div>
+                            <div><strong>สูงสุด ตาซ้าย:</strong> ${statistics.max_left_iop || 0} mmHg</div>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            // Show measurements timeline
+            html += '<div class="timeline">';
+            measurements.forEach(measurement => {
+                html += `
+                    <div class="timeline-item">
+                        <div class="record-header">
+                            <span class="record-date">${formatDate(measurement.measurement_date)} ${measurement.measurement_time || ''}</span>
+                            <span class="record-type">IOP</span>
+                        </div>
+                        <div class="record-content">
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                                <div>
+                                    <strong>ตาขวา:</strong> ${measurement.right_eye_iop || 'N/A'} mmHg
+                                    ${measurement.right_eye_iop > 21 ? '<span style="color: var(--danger); font-weight: bold;"> (สูง)</span>' : ''}
+                                </div>
+                                <div>
+                                    <strong>ตาซ้าย:</strong> ${measurement.left_eye_iop || 'N/A'} mmHg
+                                    ${measurement.left_eye_iop > 21 ? '<span style="color: var(--danger); font-weight: bold;"> (สูง)</span>' : ''}
+                                </div>
+                            </div>
+                            ${measurement.measurement_device ? `<p><strong>เครื่องมือ:</strong> ${measurement.measurement_device}</p>` : ''}
+                            ${measurement.notes ? `<p><strong>หมายเหตุ:</strong> ${measurement.notes}</p>` : ''}
+                            ${measurement.recorded_by_name ? `<p><strong>ผู้บันทึก:</strong> ${measurement.recorded_by_name}</p>` : ''}
+                        </div>
+                    </div>
+                `;
+            });
+            html += '</div>';
+            
+            container.innerHTML = html;
+        }
+
+        async function submitIOP(event) {
+            event.preventDefault();
+            
+            if (!selectedPatient) {
+                showToast('กรุณาเลือกผู้ป่วยก่อนบันทึก IOP', 'error');
+                return;
+            }
+
+            const formData = new FormData(event.target);
+            const iopData = Object.fromEntries(formData.entries());
+            
+            try {
+                showToast('กำลังบันทึกค่า IOP...', 'info');
+                
+                const response = await apiCall(`/patients/${selectedPatient.patient_id}/iop-measurements`, {
+                    method: 'POST',
+                    body: JSON.stringify(iopData)
+                });
+
+                if (response) {
+                    showToast('บันทึกค่า IOP เรียบร้อยแล้ว', 'success');
+                    clearIOPForm();
+                    loadIOPHistory();
+                }
+                
+            } catch (error) {
+                console.error('Failed to add IOP:', error);
+                showToast('ไม่สามารถบันทึกค่า IOP ได้', 'error');
+            }
+        }
+
+        // Surgery Management Functions
+        async function loadSurgeryHistory() {
+            const container = document.getElementById('surgeryHistoryContainer');
+            
+            if (!selectedPatient) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-procedures"></i>
+                        <h3>กรุณาเลือกผู้ป่วย</h3>
+                        <p>เลือกผู้ป่วยเพื่อดูประวัติการผ่าตัด</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            try {
+                container.innerHTML = `
+                    <div class="loading">
+                        <i class="fas fa-spinner"></i>
+                        กำลังโหลดประวัติการผ่าตัด...
+                    </div>
+                `;
+
+                const surgeries = await apiCall(`/patients/${selectedPatient.patient_id}/surgeries`);
+                
+                if (!surgeries || surgeries.length === 0) {
+                    container.innerHTML = `
+                        <div class="empty-state">
+                            <i class="fas fa-procedures"></i>
+                            <h3>ไม่มีประวัติการผ่าตัด</h3>
+                            <p>ผู้ป่วยยังไม่เคยผ่าตัด</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                displaySurgeryHistory(surgeries);
+                
+            } catch (error) {
+                console.error('Failed to load surgery history:', error);
+                container.innerHTML = `
+                    <div class="error-state">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <h3>ไม่สามารถโหลดประวัติการผ่าตัดได้</h3>
+                        <button class="btn-primary" onclick="loadSurgeryHistory()">ลองใหม่</button>
+                    </div>
+                `;
+            }
+        }
+
+        function displaySurgeryHistory(surgeries) {
+            const container = document.getElementById('surgeryHistoryContainer');
+            
+            let html = '<div class="timeline">';
+            surgeries.forEach(surgery => {
+                html += `
+                    <div class="timeline-item">
+                        <div class="record-header">
+                            <span class="record-date">${formatDate(surgery.surgery_date)}</span>
+                            <span class="record-type">${getSurgeryTypeText(surgery.surgery_type)}</span>
+                        </div>
+                        <div class="record-content">
+                            <p><strong>ตาที่ผ่าตัด:</strong> ${getEyeText(surgery.eye)}</p>
+                            ${surgery.pre_op_iop_left || surgery.pre_op_iop_right ? `
+                                <p><strong>IOP ก่อนผ่าตัด:</strong> 
+                                ตาขวา: ${surgery.pre_op_iop_right || 'N/A'} mmHg, 
+                                ตาซ้าย: ${surgery.pre_op_iop_left || 'N/A'} mmHg</p>
+                            ` : ''}
+                            ${surgery.procedure_details ? `<p><strong>รายละเอียด:</strong> ${surgery.procedure_details}</p>` : ''}
+                            ${surgery.complications ? `<p><strong>ภาวะแทรกซ้อน:</strong> ${surgery.complications}</p>` : ''}
+                            ${surgery.outcome ? `<p><strong>ผลการผ่าตัด:</strong> ${getOutcomeText(surgery.outcome)}</p>` : ''}
+                            ${surgery.surgeon_name ? `<p><strong>ศัลยแพทย์:</strong> ${surgery.surgeon_name}</p>` : ''}
+                        </div>
+                    </div>
+                `;
+            });
+            html += '</div>';
+            
+            container.innerHTML = html;
+        }
+
+        async function submitSurgery(event) {
+            event.preventDefault();
+            
+            if (!selectedPatient) {
+                showToast('กรุณาเลือกผู้ป่วยก่อนบันทึกการผ่าตัด', 'error');
+                return;
+            }
+
+            const formData = new FormData(event.target);
+            const surgeryData = Object.fromEntries(formData.entries());
+            
+            try {
+                showToast('กำลังบันทึกข้อมูลการผ่าตัด...', 'info');
+                
+                const response = await apiCall(`/patients/${selectedPatient.patient_id}/surgeries`, {
+                    method: 'POST',
+                    body: JSON.stringify(surgeryData)
+                });
+
+                if (response) {
+                    showToast('บันทึกการผ่าตัดเรียบร้อยแล้ว', 'success');
+                    clearSurgeryForm();
+                    loadSurgeryHistory();
+                }
+                
+            } catch (error) {
+                console.error('Failed to add surgery:', error);
+                showToast('ไม่สามารถบันทึกการผ่าตัดได้', 'error');
+            }
+        }
+
+        // Treatment Plan Functions
+        async function loadCurrentTreatmentPlan() {
+            const container = document.getElementById('currentTreatmentPlanContainer');
+            
+            if (!selectedPatient) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-clipboard-list"></i>
+                        <h3>กรุณาเลือกผู้ป่วย</h3>
+                        <p>เลือกผู้ป่วยเพื่อดูแผนการรักษา</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            try {
+                container.innerHTML = `
+                    <div class="loading">
+                        <i class="fas fa-spinner"></i>
+                        กำลังโหลดแผนการรักษา...
+                    </div>
+                `;
+
+                const plans = await apiCall(`/patients/${selectedPatient.patient_id}/treatment-plan`);
+                
+                if (!plans || plans.length === 0) {
+                    container.innerHTML = `
+                        <div class="empty-state">
+                            <i class="fas fa-clipboard-list"></i>
+                            <h3>ไม่มีแผนการรักษา</h3>
+                            <p>ยังไม่มีการวางแผนการรักษา</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                displayTreatmentPlan(plans);
+                
+            } catch (error) {
+                console.error('Failed to load treatment plan:', error);
+                container.innerHTML = `
+                    <div class="error-state">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <h3>ไม่สามารถโหลดแผนการรักษาได้</h3>
+                        <button class="btn-primary" onclick="loadCurrentTreatmentPlan()">ลองใหม่</button>
+                    </div>
+                `;
+            }
+        }
+
+        function displayTreatmentPlan(plans) {
+            const container = document.getElementById('currentTreatmentPlanContainer');
+            
+            let html = '<div class="timeline">';
+            plans.forEach(plan => {
+                html += `
+                    <div class="timeline-item">
+                        <div class="record-header">
+                            <span class="record-date">${formatDate(plan.start_date)}</span>
+                            <span class="record-type" style="background: ${plan.status === 'active' ? 'var(--success)' : 'var(--gray)'}">
+                                ${getStatusText(plan.status)}
+                            </span>
+                        </div>
+                        <div class="record-content">
+                            <p><strong>แนวทางการรักษา:</strong> ${getTreatmentApproachText(plan.treatment_approach)}</p>
+                            ${plan.target_iop_left || plan.target_iop_right ? `
+                                <p><strong>Target IOP:</strong> 
+                                ตาขวา: ${plan.target_iop_right || 'N/A'} mmHg, 
+                                ตาซ้าย: ${plan.target_iop_left || 'N/A'} mmHg</p>
+                            ` : ''}
+                            ${plan.follow_up_frequency ? `<p><strong>ความถี่ติดตาม:</strong> ${getFrequencyText(plan.follow_up_frequency)}</p>` : ''}
+                            ${plan.visual_field_test_frequency ? `<p><strong>ตรวจ Visual Field:</strong> ${getFrequencyText(plan.visual_field_test_frequency)}</p>` : ''}
+                            ${plan.notes ? `<p><strong>หมายเหตุ:</strong> ${plan.notes}</p>` : ''}
+                            ${plan.end_date ? `<p><strong>วันสิ้นสุด:</strong> ${formatDate(plan.end_date)}</p>` : ''}
+                            ${plan.created_by_name ? `<p><strong>แพทย์ผู้วางแผน:</strong> ${plan.created_by_name}</p>` : ''}
+                        </div>
+                        ${plan.status === 'active' ? `
+                            <div class="record-actions">
+                                <button class="btn-action" onclick="editTreatmentPlan('${plan.treatment_plan_id}')">
+                                    <i class="fas fa-edit"></i> แก้ไข
+                                </button>
+                                <button class="btn-action" onclick="completeTreatmentPlan('${plan.treatment_plan_id}')">
+                                    <i class="fas fa-check"></i> สำเร็จ
+                                </button>
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+            });
+            html += '</div>';
+            
+            container.innerHTML = html;
+        }
+
+        async function submitTreatmentPlan(event) {
+            event.preventDefault();
+            
+            if (!selectedPatient) {
+                showToast('กรุณาเลือกผู้ป่วยก่อนวางแผนการรักษา', 'error');
+                return;
+            }
+
+            const formData = new FormData(event.target);
+            const planData = Object.fromEntries(formData.entries());
+            
+            try {
+                showToast('กำลังบันทึกแผนการรักษา...', 'info');
+                
+                const response = await apiCall(`/patients/${selectedPatient.patient_id}/treatment-plans`, {
+                    method: 'POST',
+                    body: JSON.stringify(planData)
+                });
+
+                if (response) {
+                    showToast('วางแผนการรักษาเรียบร้อยแล้ว', 'success');
+                    clearTreatmentPlanForm();
+                    loadCurrentTreatmentPlan();
+                }
+                
+            } catch (error) {
+                console.error('Failed to create treatment plan:', error);
+                showToast('ไม่สามารถวางแผนการรักษาได้', 'error');
+            }
+        }
+
+        async function completeTreatmentPlan(planId) {
+            if (!confirm('ต้องการจบแผนการรักษานี้หรือไม่?')) return;
+            
+            try {
+                await apiCall(`/treatment-plans/${planId}`, {
+                    method: 'PUT',
+                    body: JSON.stringify({ status: 'completed' })
+                });
+
+                showToast('จบแผนการรักษาเรียบร้อยแล้ว', 'success');
+                loadCurrentTreatmentPlan();
+                
+            } catch (error) {
+                console.error('Failed to complete treatment plan:', error);
+                showToast('ไม่สามารถจบแผนการรักษาได้', 'error');
+            }
+        }
+
+        // Form clearing functions
+        function clearMedicationForm() {
+            document.getElementById('addMedicationForm').reset();
+            setTodayDate();
+        }
+
+        function clearIOPForm() {
+            document.getElementById('addIOPForm').reset();
+            setTodayDate();
+        }
+
+        function clearSurgeryForm() {
+            document.getElementById('addSurgeryForm').reset();
+            setTodayDate();
+        }
+
+        function clearTreatmentPlanForm() {
+            document.getElementById('treatmentPlanForm').reset();
+        }
+
+        // Refresh functions
+        function refreshMedications() {
+            loadCurrentMedications();
+            showToast('รีเฟรชข้อมูลยาแล้ว', 'success');
+        }
+
+        function refreshIOPData() {
+            loadIOPHistory();
+            showToast('รีเฟรชข้อมูล IOP แล้ว', 'success');
+        }
+
+        function refreshSurgeries() {
+            loadSurgeryHistory();
+            showToast('รีเฟรชประวัติการผ่าตัดแล้ว', 'success');
+        }
+
+        function refreshTreatmentPlan() {
+            loadCurrentTreatmentPlan();
+            showToast('รีเฟรชแผนการรักษาแล้ว', 'success');
+        }
+
+        // Utility Functions
+        function setTodayDate() {
+            const today = new Date().toISOString().split('T')[0];
+            const timeNow = new Date().toTimeString().split(' ')[0].substring(0, 5);
+            
+            // Set dates in all forms
+            const forms = ['addMedicationForm', 'addIOPForm', 'addSurgeryForm'];
+            forms.forEach(formId => {
+                const form = document.getElementById(formId);
+                if (form) {
+                    const dateInputs = form.querySelectorAll('input[type="date"]');
+                    dateInputs.forEach(input => {
+                        if (!input.value) {
+                            input.value = today;
+                        }
+                    });
+                    
+                    const timeInputs = form.querySelectorAll('input[type="time"]');
+                    timeInputs.forEach(input => {
+                        if (!input.value) {
+                            input.value = timeNow;
+                        }
+                    });
+                }
+            });
+        }
+
+        function calculateAge(dateOfBirth) {
+            if (!dateOfBirth) return 'N/A';
+            const birthDate = new Date(dateOfBirth);
+            const today = new Date();
+            let age = today.getFullYear() - birthDate.getFullYear();
+            const m = today.getMonth() - birthDate.getMonth();
+            if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+                age--;
+            }
+            return age;
+        }
+
+        function getGenderText(gender) {
+            const genderMap = {
+                'male': 'ชาย',
+                'female': 'หญิง',
+                'other': 'อื่นๆ'
+            };
+            return genderMap[gender] || 'ไม่ระบุ';
+        }
+
+        function getStatusText(status) {
+            const statusMap = {
+                'active': 'ใช้งาน',
+                'completed': 'เสร็จสิ้น',
+                'discontinued': 'หยุดใช้',
+                'pending': 'รอดำเนินการ'
+            };
+            return statusMap[status] || status;
+        }
+
+        function getEyeText(eye) {
+            const eyeMap = {
+                'both': 'ทั้งสองข้าง',
+                'right': 'ตาขวา',
+                'left': 'ตาซ้าย'
+            };
+            return eyeMap[eye] || eye;
+        }
+
+        function getFrequencyText(frequency) {
+            const frequencyMap = {
+                'once_daily': 'วันละ 1 ครั้ง',
+                'twice_daily': 'วันละ 2 ครั้ง',
+                'three_times_daily': 'วันละ 3 ครั้ง',
+                'four_times_daily': 'วันละ 4 ครั้ง',
+                'every_6_hours': 'ทุก 6 ชั่วโมง',
+                'every_8_hours': 'ทุก 8 ชั่วโมง',
+                'every_12_hours': 'ทุก 12 ชั่วโมง',
+                'as_needed': 'เมื่อจำเป็น',
+                'weekly': 'ทุกสัปดาห์',
+                'biweekly': 'ทุก 2 สัปดาห์',
+                'monthly': 'ทุกเดือน',
+                'bimonthly': 'ทุก 2 เดือน',
+                'quarterly': 'ทุก 3 เดือน',
+                'biannually': 'ทุก 6 เดือน',
+                'annually': 'ทุกปี'
+            };
+            return frequencyMap[frequency] || frequency;
+        }
+
+        function getSurgeryTypeText(type) {
+            const typeMap = {
+                'trabeculectomy': 'Trabeculectomy',
+                'tube_shunt': 'Tube Shunt Surgery',
+                'laser_trabeculoplasty': 'Laser Trabeculoplasty',
+                'cyclophotocoagulation': 'Cyclophotocoagulation',
+                'migs': 'MIGS',
+                'other': 'อื่นๆ'
+            };
+            return typeMap[type] || type;
+        }
+
+        function getOutcomeText(outcome) {
+            const outcomeMap = {
+                'excellent': 'ดีเยี่ยม',
+                'good': 'ดี',
+                'fair': 'พอใช้',
+                'poor': 'ไม่ดี'
+            };
+            return outcomeMap[outcome] || outcome;
+        }
+
+        function getTreatmentApproachText(approach) {
+            const approachMap = {
+                'medical': 'การรักษาด้วยยา',
+                'laser': 'การรักษาด้วย Laser',
+                'surgical': 'การผ่าตัด',
+                'combination': 'การรักษาแบบผสมผสาน',
+                'observation': 'การสังเกตอาการ'
+            };
+            return approachMap[approach] || approach;
+        }
+
+        function formatDate(dateString) {
+            if (!dateString) return 'ไม่ระบุ';
+            
+            try {
+                const date = new Date(dateString);
+                return date.toLocaleDateString('th-TH', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                });
+            } catch (error) {
+                return 'ไม่ระบุ';
+            }
+        }
+
+        // Modal search functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeApp();
+            
+            // Modal search
+            document.getElementById('modalSearchInput').addEventListener('input', (e) => {
+                const searchTerm = e.target.value.toLowerCase();
+                const filteredPatients = doctorPatients.filter(p => 
+                    (p.first_name && p.first_name.toLowerCase().includes(searchTerm)) ||
+                    (p.last_name && p.last_name.toLowerCase().includes(searchTerm)) ||
+                    (p.hn && p.hn.toLowerCase().includes(searchTerm))
+                );
+                displayModalPatients(filteredPatients);
+            });
+
+            // Close modals when clicking outside
+            document.addEventListener('click', function(e) {
+                if (e.target.classList.contains('modal')) {
+                    e.target.classList.remove('show');
+                }
+            });
+
+            // Form submissions
+            document.getElementById('addMedicationForm').addEventListener('submit', submitMedication);
+            document.getElementById('addIOPForm').addEventListener('submit', submitIOP);
+            document.getElementById('addSurgeryForm').addEventListener('submit', submitSurgery);
+            document.getElementById('treatmentPlanForm').addEventListener('submit', submitTreatmentPlan);
+        });
+    </script>
+</body>
+</html>      

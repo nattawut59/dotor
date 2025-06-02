@@ -1,0 +1,2348 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monitoring System - Glaucoma Care System</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <style>
+        :root {
+            --primary: #324047;
+            --secondary: #00CECE;
+            --secondary-dark: #00A8A8;
+            --accent: #EFEFEF;
+            --white: #ffffff;
+            --dark: #2c3e50;
+            --gray: #7f8c8d;
+            --light: #f8f9fa;
+            --danger: #e74c3c;
+            --warning: #f39c12;
+            --success: #27ae60;
+            --info: #3498db;
+            --shadow: 0 8px 25px rgba(50, 64, 71, 0.1);
+            --shadow-lg: 0 15px 35px rgba(50, 64, 71, 0.15);
+            --radius: 20px;
+            --radius-sm: 12px;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, var(--accent) 0%, #d4e6f1 50%, #a8d8ea 100%);
+            background-attachment: fixed;
+            color: var(--dark);
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        /* Header */
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+            box-shadow: var(--shadow);
+            padding: 1rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            text-decoration: none;
+            color: var(--primary);
+            font-size: 1.5rem;
+            font-weight: 800;
+        }
+
+        .logo i {
+            font-size: 2rem;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .breadcrumb {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--gray);
+            font-weight: 500;
+        }
+
+        .breadcrumb a {
+            color: var(--secondary);
+            text-decoration: none;
+            transition: var(--transition);
+        }
+
+        .breadcrumb a:hover {
+            color: var(--primary);
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .btn-back {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: var(--white);
+            border: none;
+            border-radius: var(--radius-sm);
+            padding: 0.75rem 1.5rem;
+            font-weight: 600;
+            text-decoration: none;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-back:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow);
+            color: var(--white);
+        }
+
+        /* Main Container */
+        .main-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+            min-height: calc(100vh - 120px);
+        }
+
+        /* Tab Navigation */
+        .tab-navigation {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: var(--radius);
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .tab-nav-title {
+            font-size: 1.75rem;
+            font-weight: 800;
+            color: var(--primary);
+            margin-bottom: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .tab-buttons {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .tab-button {
+            background: var(--white);
+            border: 2px solid transparent;
+            border-radius: var(--radius);
+            padding: 2rem;
+            cursor: pointer;
+            transition: var(--transition);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 0.25rem 0.5rem rgba(0, 0, 0, 0.1);
+        }
+
+        .tab-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, var(--secondary), var(--secondary-dark));
+            transition: var(--transition);
+            z-index: -1;
+        }
+
+        .tab-button:hover,
+        .tab-button.active {
+            color: var(--white);
+            border-color: var(--secondary);
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .tab-button:hover::before,
+        .tab-button.active::before {
+            left: 0;
+        }
+
+        .tab-icon {
+            font-size: 3rem;
+            margin-bottom: 1.5rem;
+            transition: var(--transition);
+        }
+
+        .tab-button:hover .tab-icon,
+        .tab-button.active .tab-icon {
+            transform: scale(1.1);
+        }
+
+        .tab-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 0.75rem;
+        }
+
+        .tab-description {
+            font-size: 0.95rem;
+            opacity: 0.9;
+        }
+
+        /* Content Area */
+        .content-area {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            min-height: 600px;
+        }
+
+        .content-header {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: var(--white);
+            padding: 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .content-title {
+            font-size: 1.75rem;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .content-actions {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .btn-primary {
+            background: rgba(255, 255, 255, 0.2);
+            color: var(--white);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: var(--radius-sm);
+            padding: 0.75rem 1.5rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            backdrop-filter: blur(10px);
+        }
+
+        .btn-primary:hover {
+            background: var(--white);
+            color: var(--primary);
+            transform: translateY(-2px);
+        }
+
+        .content-body {
+            padding: 2rem;
+        }
+
+        /* Patient Selection */
+        .patient-selection {
+            background: var(--accent);
+            border-radius: var(--radius);
+            padding: 2rem;
+            margin-bottom: 2rem;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            box-shadow: var(--shadow);
+        }
+
+        .patient-card {
+            background: var(--white);
+            border-radius: var(--radius);
+            padding: 2rem;
+            border: 2px solid transparent;
+            transition: var(--transition);
+            box-shadow: 0 0.25rem 0.5rem rgba(0, 0, 0, 0.1);
+        }
+
+        .patient-card.selected {
+            border-color: var(--secondary);
+            box-shadow: 0 0 0 4px rgba(0, 212, 170, 0.2);
+        }
+
+        .patient-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .patient-name {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--primary);
+            margin-bottom: 0.75rem;
+        }
+
+        .patient-details {
+            color: var(--gray);
+            font-size: 1rem;
+            font-weight: 500;
+        }
+
+        .btn-change-patient {
+            background: var(--secondary);
+            color: var(--white);
+            border: none;
+            border-radius: var(--radius-sm);
+            padding: 0.75rem 1.5rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .btn-change-patient:hover {
+            background: var(--secondary-dark);
+            transform: translateY(-2px);
+        }
+
+        /* IOP Chart Styles */
+        .chart-container {
+            background: var(--white);
+            border-radius: var(--radius);
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 3px solid var(--secondary);
+        }
+
+        .chart-title {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .chart-controls {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .chart-body {
+            height: 400px;
+            position: relative;
+        }
+
+        /* IOP Values Display */
+        .iop-values {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .iop-card {
+            background: var(--white);
+            border-radius: var(--radius);
+            padding: 2rem;
+            text-align: center;
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            position: relative;
+            overflow: hidden;
+            transition: var(--transition);
+        }
+
+        .iop-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .iop-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+        }
+
+        .iop-label {
+            font-size: 1rem;
+            color: var(--gray);
+            font-weight: 700;
+            text-transform: uppercase;
+            margin-bottom: 1rem;
+            letter-spacing: 0.5px;
+        }
+
+        .iop-value {
+            font-size: 3rem;
+            font-weight: 900;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .iop-unit {
+            color: var(--gray);
+            font-weight: 600;
+            font-size: 1rem;
+        }
+
+        .iop-status {
+            margin-top: 1rem;
+            padding: 0.5rem 1rem;
+            border-radius: 25px;
+            font-size: 0.9rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .status-normal {
+            background: rgba(40, 167, 69, 0.15);
+            color: var(--success);
+            border: 2px solid rgba(40, 167, 69, 0.3);
+        }
+
+        .status-high {
+            background: rgba(220, 53, 69, 0.15);
+            color: var(--danger);
+            border: 2px solid rgba(220, 53, 69, 0.3);
+        }
+
+        .status-warning {
+            background: rgba(255, 193, 7, 0.15);
+            color: var(--warning);
+            border: 2px solid rgba(255, 193, 7, 0.3);
+        }
+
+        /* Form Styles */
+        .form-section {
+            background: var(--white);
+            border-radius: var(--radius);
+            padding: 2rem;
+            margin-bottom: 2rem;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            box-shadow: var(--shadow);
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--primary);
+            margin-bottom: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 3px solid var(--secondary);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .form-label {
+            font-weight: 700;
+            color: var(--primary);
+            font-size: 0.95rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .form-control {
+            background: var(--white);
+            border: 2px solid rgba(0, 0, 0, 0.1);
+            border-radius: var(--radius-sm);
+            padding: 0.75rem 1rem;
+            font-size: 1rem;
+            transition: var(--transition);
+            outline: none;
+        }
+
+        .form-control:focus {
+            border-color: var(--secondary);
+            box-shadow: 0 0 0 3px rgba(0, 212, 170, 0.2);
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-save {
+            background: linear-gradient(135deg, var(--success), #20c997);
+            color: var(--white);
+            border: none;
+            border-radius: var(--radius-sm);
+            padding: 0.75rem 2rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .btn-save:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow);
+        }
+
+        .btn-cancel {
+            background: var(--gray);
+            color: var(--white);
+            border: none;
+            border-radius: var(--radius-sm);
+            padding: 0.75rem 2rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .btn-cancel:hover {
+            background: var(--danger);
+            transform: translateY(-2px);
+        }
+
+        /* Loading and Empty States */
+        .loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 4rem;
+            color: var(--gray);
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+
+        .loading i {
+            animation: spin 1s linear infinite;
+            margin-right: 1rem;
+            font-size: 2rem;
+            color: var(--secondary);
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: var(--gray);
+        }
+
+        .empty-state i {
+            font-size: 5rem;
+            margin-bottom: 2rem;
+            opacity: 0.6;
+            color: var(--secondary);
+        }
+
+        .empty-state h3 {
+            margin-bottom: 1rem;
+            color: var(--primary);
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .empty-state p {
+            font-size: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            z-index: 9999;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.show {
+            display: flex;
+        }
+
+        .modal-content {
+            background: var(--white);
+            border-radius: var(--radius);
+            width: 90%;
+            max-width: 800px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: var(--shadow-lg);
+            animation: modalSlideIn 0.3s ease;
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: var(--white);
+            padding: 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: 800;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: var(--white);
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 50%;
+            transition: var(--transition);
+        }
+
+        .modal-close:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .modal-body {
+            padding: 2rem;
+        }
+
+        /* Toast Notification Styles */
+        #toastContainer {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 10000;
+            display: flex;
+            flex-direction: column-reverse; 
+            gap: 10px;
+        }
+
+        .toast {
+            background-color: var(--dark);
+            color: var(--white);
+            padding: 1rem 1.5rem;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-lg);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            opacity: 0;
+            transform: translateX(100%);
+            transition: opacity 0.3s ease, transform 0.3s ease;
+            min-width: 300px;
+            max-width: 500px;
+            font-weight: 600;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .toast-success { 
+            background: linear-gradient(135deg, var(--success), #20c997);
+        }
+        .toast-error { 
+            background: linear-gradient(135deg, var(--danger), #e74c3c);
+        }
+        .toast-info { 
+            background: linear-gradient(135deg, var(--info), #3498db);
+        }
+        .toast i { 
+            font-size: 1.5rem; 
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1200px) {
+            .tab-buttons {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                gap: 1rem;
+                padding: 0 1rem;
+            }
+
+            .main-container {
+                padding: 1rem;
+            }
+
+            .tab-buttons {
+                grid-template-columns: 1fr;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .content-header {
+                flex-direction: column;
+                gap: 1rem;
+                text-align: center;
+            }
+
+            .content-actions {
+                flex-direction: column;
+                width: 100%;
+            }
+
+            .btn-primary {
+                justify-content: center;
+            }
+
+            .form-actions {
+                flex-direction: column;
+            }
+
+            .patient-info {
+                flex-direction: column;
+                gap: 1rem;
+                text-align: center;
+            }
+
+            .iop-values {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 480px) {
+            .iop-values {
+                grid-template-columns: 1fr;
+            }
+
+            .chart-controls {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+        }
+
+        /* Enhanced styles for better visual appeal */
+        .medication-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+        }
+
+        .medication-card {
+            background: linear-gradient(135deg, var(--white), var(--accent));
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            border-radius: var(--radius);
+            padding: 2rem;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .medication-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+        }
+
+        .medication-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .alert-panel {
+            background: var(--white);
+            border-radius: var(--radius);
+            padding: 2rem;
+            margin-bottom: 2rem;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            box-shadow: var(--shadow);
+        }
+
+        .alert-item {
+            background: var(--light);
+            border-radius: var(--radius);
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            border-left: 4px solid;
+            transition: var(--transition);
+        }
+
+        .alert-item:hover {
+            transform: translateX(8px);
+            box-shadow: var(--shadow);
+        }
+
+        .alert-high { border-color: var(--danger); }
+        .alert-medium { border-color: var(--warning); }
+        .alert-low { border-color: var(--info); }
+
+        .surgery-record {
+            background: var(--white);
+            border-radius: var(--radius);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            border-left: 4px solid var(--info);
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+        }
+
+        .surgery-record:hover {
+            transform: translateX(8px);
+            box-shadow: var(--shadow-lg);
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <a href="dashboard.html" class="logo">
+                <i class="fas fa-eye"></i>
+                <span>Glaucoma Care</span>
+            </a>
+            
+            <div class="breadcrumb">
+                <a href="dashboard.html">แดชบอร์ด</a>
+                <i class="fas fa-chevron-right"></i>
+                <span>ระบบติดตาม</span>
+            </div>
+
+            <div class="header-actions">
+                <a href="dashboard.html" class="btn-back">
+                    <i class="fas fa-arrow-left"></i>
+                    <span>กลับหน้าหลัก</span>
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="main-container">
+        <!-- Patient Selection -->
+        <section class="patient-selection" id="patientSelection">
+            <h3 style="margin-bottom: 1.5rem; color: var(--primary); font-weight: 800; font-size: 1.25rem;">
+                <i class="fas fa-user-md"></i> ผู้ป่วยที่เลือก
+            </h3>
+            <div id="selectedPatientCard">
+                <div class="empty-state">
+                    <i class="fas fa-user-circle"></i>
+                    <h3>ยังไม่ได้เลือกผู้ป่วย</h3>
+                    <p>กรุณาเลือกผู้ป่วยเพื่อเริ่มการติดตาม</p>
+                    <button class="btn-primary" onclick="showPatientSelectionModal()">
+                        <i class="fas fa-search"></i>
+                        เลือกผู้ป่วย
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Tab Navigation -->
+        <section class="tab-navigation">
+            <h2 class="tab-nav-title">
+                <i class="fas fa-heartbeat"></i>
+                ระบบติดตาม
+            </h2>
+            <div class="tab-buttons">
+                <div class="tab-button active" data-tab="iop-tracking">
+                    <div class="tab-icon">
+                        <i class="fas fa-eye"></i>
+                    </div>
+                    <h3 class="tab-title">ติดตาม IOP</h3>
+                    <p class="tab-description">ติดตามค่า IOP และ Target IOP ของผู้ป่วย</p>
+                </div>
+
+                <div class="tab-button" data-tab="medication-tracking">
+                    <div class="tab-icon">
+                        <i class="fas fa-pills"></i>
+                    </div>
+                    <h3 class="tab-title">ติดตามการใช้ยา</h3>
+                    <p class="tab-description">ติดตามการใช้ยาและการปฏิบัติตามคำแนะนำ</p>
+                </div>
+
+                <div class="tab-button" data-tab="laser-surgery">
+                    <div class="tab-icon">
+                        <i class="fas fa-procedures"></i>
+                    </div>
+                    <h3 class="tab-title">การผ่าตัด Laser</h3>
+                    <p class="tab-description">บันทึกการผ่าตัด Laser Needling และติดตามผล</p>
+                </div>
+
+                <div class="tab-button" data-tab="alerts">
+                    <div class="tab-icon">
+                        <i class="fas fa-bell"></i>
+                    </div>
+                    <h3 class="tab-title">ระบบแจ้งเตือน</h3>
+                    <p class="tab-description">การแจ้งเตือนและการติดตามอาการ</p
+                        </div>
+            </div>
+        </section>
+
+        <!-- Content Area -->
+        <div class="content-area">
+            <!-- IOP Tracking Tab -->
+            <div id="iop-tracking" class="tab-content active">
+                <div class="content-header">
+                    <h2 class="content-title">
+                        <i class="fas fa-eye"></i>
+                        ติดตามค่า IOP และ Target IOP
+                    </h2>
+                    <div class="content-actions">
+                        <button class="btn-primary" onclick="addIOPRecord()">
+                            <i class="fas fa-plus"></i>
+                            เพิ่มค่า IOP
+                        </button>
+                        <button class="btn-primary" onclick="refreshIOPData()">
+                            <i class="fas fa-sync-alt"></i>
+                            รีเฟรช
+                        </button>
+                    </div>
+                </div>
+                <div class="content-body">
+                    <!-- Current IOP Values -->
+                    <div class="iop-values" id="iopValues">
+                        <div class="iop-card">
+                            <div class="iop-label">IOP ตาขวา</div>
+                            <div class="iop-value" id="iopRight">--</div>
+                            <div class="iop-unit">mmHg</div>
+                            <div class="iop-status status-normal" id="statusRight">ไม่มีข้อมูล</div>
+                        </div>
+
+                        <div class="iop-card">
+                            <div class="iop-label">IOP ตาซ้าย</div>
+                            <div class="iop-value" id="iopLeft">--</div>
+                            <div class="iop-unit">mmHg</div>
+                            <div class="iop-status status-normal" id="statusLeft">ไม่มีข้อมูล</div>
+                        </div>
+
+                        <div class="iop-card">
+                            <div class="iop-label">Target IOP</div>
+                            <div class="iop-value" id="targetIOP">--</div>
+                            <div class="iop-unit">mmHg</div>
+                            <div class="iop-status status-normal">เป้าหมาย</div>
+                        </div>
+
+                        <div class="iop-card">
+                            <div class="iop-label">วันที่ตรวจล่าสุด</div>
+                            <div class="iop-value" style="font-size: 1.5rem;" id="lastCheck">--</div>
+                            <div class="iop-unit">วันที่แล้ว</div>
+                            <div class="iop-status status-normal">ยังไม่มีข้อมูล</div>
+                        </div>
+                    </div>
+
+                    <!-- IOP Chart -->
+                    <div class="chart-container">
+                        <div class="chart-header">
+                            <h3 class="chart-title">
+                                <i class="fas fa-chart-line"></i>
+                                กราฟแนวโน้มค่า IOP
+                            </h3>
+                            <div class="chart-controls">
+                                <select class="form-control" style="width: 150px;" id="chartPeriod">
+                                    <option value="30">30 วันล่าสุด</option>
+                                    <option value="90">3 เดือนล่าสุด</option>
+                                    <option value="180">6 เดือนล่าสุด</option>
+                                    <option value="365">1 ปีล่าสุด</option>
+                                </select>
+                                <button class="btn-primary" onclick="exportIOPChart()">
+                                    <i class="fas fa-download"></i>
+                                    ส่งออก
+                                </button>
+                            </div>
+                        </div>
+                        <div class="chart-body" id="iopChart">
+                            <div class="empty-state">
+                                <i class="fas fa-chart-line"></i>
+                                <h3>กรุณาเลือกผู้ป่วย</h3>
+                                <p>เลือกผู้ป่วยเพื่อดูกราฟแนวโน้มค่า IOP</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Medication Tracking Tab -->
+            <div id="medication-tracking" class="tab-content">
+                <div class="content-header">
+                    <h2 class="content-title">
+                        <i class="fas fa-pills"></i>
+                        ติดตามการใช้ยาของผู้ป่วย
+                    </h2>
+                    <div class="content-actions">
+                        <button class="btn-primary" onclick="addMedicationRecord()">
+                            <i class="fas fa-plus"></i>
+                            เพิ่มยา
+                        </button>
+                        <button class="btn-primary" onclick="updateMedicationStatus()">
+                            <i class="fas fa-edit"></i>
+                            อัปเดตสถานะ
+                        </button>
+                    </div>
+                </div>
+                <div class="content-body">
+                    <div class="medication-grid" id="medicationGrid">
+                        <div class="empty-state">
+                            <i class="fas fa-pills"></i>
+                            <h3>กรุณาเลือกผู้ป่วย</h3>
+                            <p>เลือกผู้ป่วยเพื่อดูข้อมูลการใช้ยา</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Laser Surgery Tab -->
+            <div id="laser-surgery" class="tab-content">
+                <div class="content-header">
+                    <h2 class="content-title">
+                        <i class="fas fa-procedures"></i>
+                        บันทึกการผ่าตัด Laser Needling
+                    </h2>
+                    <div class="content-actions">
+                        <button class="btn-primary" onclick="addSurgeryRecord()">
+                            <i class="fas fa-plus"></i>
+                            บันทึกการผ่าตัดใหม่
+                        </button>
+                    </div>
+                </div>
+                <div class="content-body">
+                    <!-- Surgery Form -->
+                    <div class="form-section">
+                        <h3 class="section-title">
+                            <i class="fas fa-surgical-operation"></i>
+                            ข้อมูลการผ่าตัด
+                        </h3>
+                        <form id="surgeryForm">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label class="form-label">วันที่ผ่าตัด *</label>
+                                    <input type="date" class="form-control" name="surgeryDate" required>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">ตาที่ผ่าตัด *</label>
+                                    <select class="form-control" name="eye" required>
+                                        <option value="">เลือกตา</option>
+                                        <option value="right">ตาขวา</option>
+                                        <option value="left">ตาซ้าย</option>
+                                        <option value="both">ทั้งสองตา</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">ประเภทการผ่าตัด *</label>
+                                    <select class="form-control" name="surgeryType" required>
+                                        <option value="">เลือกประเภท</option>
+                                        <option value="Laser Needling">Laser Needling</option>
+                                        <option value="Argon Laser Trabeculoplasty">Argon Laser Trabeculoplasty</option>
+                                        <option value="Selective Laser Trabeculoplasty">Selective Laser Trabeculoplasty</option>
+                                        <option value="Laser Iridotomy">Laser Iridotomy</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label class="form-label">IOP ตาซ้ายก่อนผ่าตัด (mmHg)</label>
+                                    <input type="number" class="form-control" name="preOpIOPLeft" step="0.1" min="0" max="50">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">IOP ตาขวาก่อนผ่าตัด (mmHg)</label>
+                                    <input type="number" class="form-control" name="preOpIOPRight" step="0.1" min="0" max="50">
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">รายละเอียดการผ่าตัด</label>
+                                <textarea class="form-control" name="procedureDetails" rows="3" placeholder="รายละเอียดขั้นตอนการผ่าตัด, พลังงานที่ใช้, จำนวนจุด"></textarea>
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label class="form-label">ภาวะแทรกซ้อน</label>
+                                    <select class="form-control" name="complications">
+                                        <option value="none">ไม่มี</option>
+                                        <option value="bleeding">เลือดออก</option>
+                                        <option value="inflammation">การอักเสบ</option>
+                                        <option value="pressure-spike">IOP สูงขึ้นชั่วคราว</option>
+                                        <option value="other">อื่นๆ</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">ผลการผ่าตัด</label>
+                                    <select class="form-control" name="outcome">
+                                        <option value="successful">สำเร็จ</option>
+                                        <option value="partial">สำเร็จบางส่วน</option>
+                                        <option value="unsuccessful">ไม่สำเร็จ</option>
+                                        <option value="pending">รอติดตามผล</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">หมายเหตุเพิ่มเติม</label>
+                                <textarea class="form-control" name="notes" rows="2" placeholder="หมายเหตุพิเศษ, การดูแลหลังผ่าตัด"></textarea>
+                            </div>
+
+                            <div class="form-actions">
+                                <button type="button" class="btn-cancel" onclick="clearSurgeryForm()">
+                                    <i class="fas fa-times"></i>
+                                    ยกเลิก
+                                </button>
+                                <button type="submit" class="btn-save">
+                                    <i class="fas fa-save"></i>
+                                    บันทึกการผ่าตัด
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Surgery History -->
+                    <div class="form-section">
+                        <h3 class="section-title">
+                            <i class="fas fa-history"></i>
+                            ประวัติการผ่าตัด
+                        </h3>
+                        <div id="surgeryHistory">
+                            <div class="empty-state">
+                                <i class="fas fa-procedures"></i>
+                                <h3>กรุณาเลือกผู้ป่วย</h3>
+                                <p>เลือกผู้ป่วยเพื่อดูประวัติการผ่าตัด</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Alerts Tab -->
+            <div id="alerts" class="tab-content">
+                <div class="content-header">
+                    <h2 class="content-title">
+                        <i class="fas fa-bell"></i>
+                        ระบบแจ้งเตือน
+                    </h2>
+                    <div class="content-actions">
+                        <button class="btn-primary" onclick="refreshAlerts()">
+                            <i class="fas fa-sync-alt"></i>
+                            รีเฟรช
+                        </button>
+                        <button class="btn-primary" onclick="markAllAsRead()">
+                            <i class="fas fa-check-double"></i>
+                            อ่านทั้งหมด
+                        </button>
+                    </div>
+                </div>
+                <div class="content-body">
+                    <div class="alert-panel">
+                        <div class="alert-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; padding-bottom: 1rem; border-bottom: 2px solid var(--warning);">
+                            <h3 style="font-size: 1.3rem; font-weight: 700; color: var(--warning); display: flex; align-items: center; gap: 0.75rem;">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                การแจ้งเตือนทั้งหมด
+                            </h3>
+                            <div>
+                                <span id="alertCount" style="background: var(--danger); color: var(--white); padding: 0.25rem 0.75rem; border-radius: 15px; font-size: 0.8rem; font-weight: 600;">0</span>
+                            </div>
+                        </div>
+                        <div id="alertsList">
+                            <div class="loading">
+                                <i class="fas fa-spinner"></i>
+                                กำลังโหลดการแจ้งเตือน...
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Patient Selection Modal -->
+    <div id="patientSelectionModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">เลือกผู้ป่วย</h3>
+                <button class="modal-close" onclick="closePatientSelectionModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label">ค้นหาผู้ป่วย</label>
+                    <input type="text" class="form-control" id="modalSearchInput" placeholder="ชื่อ, นามสกุล, HN, หรือเลขบัตรประชาชน">
+                </div>
+                <div id="modalPatientList" style="max-height: 400px; overflow-y: auto;">
+                    <div class="loading">
+                        <i class="fas fa-spinner"></i>
+                        กำลังโหลดรายชื่อผู้ป่วย...
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- IOP Entry Modal -->
+    <div id="iopEntryModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">บันทึกค่า IOP</h3>
+                <button class="modal-close" onclick="closeIOPEntryModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="iopEntryForm">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">วันที่ตรวจ *</label>
+                            <input type="date" class="form-control" name="measurementDate" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">เวลา *</label>
+                            <input type="time" class="form-control" name="measurementTime" required>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">IOP ตาขวา (mmHg) *</label>
+                            <input type="number" class="form-control" name="rightEyeIOP" step="0.1" min="0" max="50" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">IOP ตาซ้าย (mmHg) *</label>
+                            <input type="number" class="form-control" name="leftEyeIOP" step="0.1" min="0" max="50" required>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">วิธีการวัด</label>
+                            <select class="form-control" name="measurementMethod">
+                                <option value="Goldmann Applanation">Goldmann Applanation</option>
+                                <option value="Non-contact Tonometry">Non-contact Tonometry</option>
+                                <option value="Rebound Tonometry">Rebound Tonometry</option>
+                                <option value="other">อื่นๆ</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">อุปกรณ์ที่ใช้</label>
+                            <input type="text" class="form-control" name="measurementDevice" placeholder="ชื่ออุปกรณ์">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">หมายเหตุ</label>
+                        <textarea class="form-control" name="notes" rows="3" placeholder="หมายเหตุเพิ่มเติม"></textarea>
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" class="btn-cancel" onclick="closeIOPEntryModal()">
+                            <i class="fas fa-times"></i>
+                            ยกเลิก
+                        </button>
+                        <button type="submit" class="btn-save">
+                            <i class="fas fa-save"></i>
+                            บันทึกค่า IOP
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // API Configuration
+        const API_BASE_URL = 'http://localhost:3000/api';
+        
+        // Get auth token from localStorage
+        function getAuthToken() {
+            return localStorage.getItem('doctorToken');
+        }
+
+        // Check if user is authenticated
+        function checkAuth() {
+            const token = getAuthToken();
+            if (!token) {
+                window.location.href = 'login.html';
+                return false;
+            }
+            return true;
+        }
+
+        // Global state
+        let selectedPatient = null;
+        let currentTab = 'iop-tracking';
+        let allPatients = [];
+        let iopChartInstance = null;
+
+        // API Helper Functions
+        async function apiCall(endpoint, options = {}) {
+            try {
+                showLoadingOverlay(`กำลังเรียกข้อมูล...`);
+                
+                const token = getAuthToken();
+                const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`,
+                        ...options.headers
+                    },
+                    ...options
+                });
+
+                if (!response.ok) {
+                    if (response.status === 401) {
+                        // Token expired or invalid
+                        localStorage.removeItem('doctorToken');
+                        window.location.href = 'login.html';
+                        return;
+                    }
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+                }
+                
+                hideLoadingOverlay();
+                return await response.json();
+            } catch (error) {
+                hideLoadingOverlay();
+                console.error('API call failed:', error);
+                showError(`เกิดข้อผิดพลาด: ${error.message}`);
+                throw error;
+            }
+        }
+
+        // Tab Management
+        function initializeTabs() {
+            const tabButtons = document.querySelectorAll('.tab-button');
+
+            tabButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    const tabId = button.getAttribute('data-tab');
+                    switchTab(tabId);
+                });
+            });
+        }
+
+        function switchTab(tabId) {
+            currentTab = tabId;
+
+            document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+            document.querySelector(`[data-tab="${tabId}"]`).classList.add('active');
+
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+                content.style.display = 'none';
+            });
+
+            const activeContent = document.getElementById(tabId);
+            activeContent.classList.add('active');
+            activeContent.style.display = 'block';
+
+            if (selectedPatient) {
+                loadDataForCurrentTab();
+            } else {
+                showEmptyStateForTab(tabId);
+            }
+        }
+
+        function loadDataForCurrentTab() {
+            if (!selectedPatient) return;
+            
+            switch (currentTab) {
+                case 'iop-tracking':
+                    loadIOPData(selectedPatient.patient_id);
+                    break;
+                case 'medication-tracking':
+                    loadMedicationData(selectedPatient.patient_id);
+                    break;
+                case 'laser-surgery':
+                    loadSurgeryHistory(selectedPatient.patient_id);
+                    clearSurgeryForm();
+                    break;
+                case 'alerts':
+                    loadAlerts();
+                    break;
+            }
+        }
+
+        function showEmptyStateForTab(tabId) {
+            switch (tabId) {
+                case 'iop-tracking':
+                    document.getElementById('iopValues').innerHTML = getEmptyIOPCardsHTML();
+                    document.getElementById('iopChart').innerHTML = getEmptyChartHTML('IOP');
+                    break;
+                case 'medication-tracking':
+                    document.getElementById('medicationGrid').innerHTML = getEmptyMedicationHTML();
+                    break;
+                case 'laser-surgery':
+                    document.getElementById('surgeryHistory').innerHTML = getEmptySurgeryHistoryHTML();
+                    break;
+                case 'alerts':
+                    document.getElementById('alertsList').innerHTML = getEmptyAlertsHTML();
+                    document.getElementById('alertCount').textContent = '0';
+                    break;
+            }
+        }
+
+        // Patient Selection Functions
+        async function showPatientSelectionModal() {
+            document.getElementById('patientSelectionModal').classList.add('show');
+            await loadModalPatientList();
+        }
+
+        function closePatientSelectionModal() {
+            document.getElementById('patientSelectionModal').classList.remove('show');
+        }
+
+        async function loadModalPatientList() {
+            const container = document.getElementById('modalPatientList');
+            container.innerHTML = `<div class="loading"><i class="fas fa-spinner"></i> กำลังโหลดรายชื่อผู้ป่วย...</div>`;
+            
+            try {
+                const patients = await apiCall('/patients');
+                allPatients = patients;
+                
+                if (patients.length === 0) {
+                    container.innerHTML = `<div class="empty-state"><i class="fas fa-users"></i><h3>ไม่มีข้อมูลผู้ป่วย</h3><p>ยังไม่มีผู้ป่วยในระบบ</p></div>`;
+                    return;
+                }
+                
+                displayModalPatients(patients);
+            } catch (error) {
+                container.innerHTML = `<div class="empty-state"><i class="fas fa-exclamation-triangle"></i><h3>ไม่สามารถโหลดข้อมูลได้</h3><p>เกิดข้อผิดพลาดในการโหลดข้อมูลผู้ป่วย</p></div>`;
+            }
+        }
+
+        function displayModalPatients(patients) {
+            const container = document.getElementById('modalPatientList');
+            container.innerHTML = patients.map(patient => `
+                <div class="patient-card" onclick="selectPatient('${patient.patient_id}')" style="cursor: pointer; margin-bottom: 1rem;">
+                    <div class="patient-info">
+                        <div>
+                            <div class="patient-name">${patient.first_name} ${patient.last_name}</div>
+                            <div class="patient-details">
+                                HN: ${patient.hn || 'N/A'} • อายุ ${calculateAge(patient.date_of_birth)} ปี • ${getGenderText(patient.gender)}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function selectPatient(patientId) {
+            const patient = allPatients.find(p => p.patient_id === patientId);
+            if (patient) {
+                selectedPatient = patient;
+                updateSelectedPatientDisplay();
+                closePatientSelectionModal();
+                showSuccess(`เลือกผู้ป่วย: ${patient.first_name} ${patient.last_name}`);
+                loadDataForCurrentTab();
+            }
+        }
+
+        function updateSelectedPatientDisplay() {
+            const container = document.getElementById('selectedPatientCard');
+            if (!selectedPatient) {
+                
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-user-circle"></i>
+                        <h3>ยังไม่ได้เลือกผู้ป่วย</h3>
+                        <p>กรุณาเลือกผู้ป่วยเพื่อเริ่มการติดตาม</p>
+                        <button class="btn-primary" onclick="showPatientSelectionModal()">
+                            <i class="fas fa-search"></i> เลือกผู้ป่วย
+                        </button>
+                    </div>`;
+                ['iop-tracking', 'medication-tracking', 'laser-surgery', 'alerts'].forEach(showEmptyStateForTab);
+                return;
+            }
+
+            container.innerHTML = `
+                <div class="patient-card selected">
+                    <div class="patient-info">
+                        <div>
+                            <div class="patient-name">${selectedPatient.first_name} ${selectedPatient.last_name}</div>
+                            <div class="patient-details">
+                                HN: ${selectedPatient.hn || 'N/A'} • อายุ ${calculateAge(selectedPatient.date_of_birth)} ปี • 
+                                ${getGenderText(selectedPatient.gender)}
+                            </div>
+                        </div>
+                        <div>
+                            <button class="btn-change-patient" onclick="showPatientSelectionModal()">
+                                <i class="fas fa-exchange-alt"></i> เปลี่ยนผู้ป่วย
+                            </button>
+                        </div>
+                    </div>
+                </div>`;
+        }
+
+        // IOP Functions
+        async function loadIOPData(patientId) {
+            const iopValuesContainer = document.getElementById('iopValues');
+            const iopChartContainer = document.getElementById('iopChart');
+            iopValuesContainer.innerHTML = getEmptyIOPCardsHTML(true);
+            iopChartContainer.innerHTML = getEmptyChartHTML('IOP', true);
+
+            try {
+                const iopData = await apiCall(`/patients/${patientId}/iop-measurements`);
+                updateIOPDisplay(iopData.measurements || []);
+                loadIOPChart(iopData.measurements || []);
+            } catch (error) {
+                showError('ไม่สามารถโหลดข้อมูล IOP ได้');
+                iopValuesContainer.innerHTML = getEmptyIOPCardsHTML();
+                iopChartContainer.innerHTML = getEmptyChartHTML('IOP');
+            }
+        }
+        
+        function getIOPStatusClass(value, target) {
+            if (value === null || value === undefined || value === '--') return 'status-normal';
+            const targetValue = target || 21; // Default target if not specified
+            
+            if (value > targetValue + 5) return 'status-high';
+            if (value > targetValue) return 'status-warning';
+            return 'status-normal';
+        }
+
+        function getIOPStatusText(statusClass) {
+            switch (statusClass) {
+                case 'status-high': return 'สูง';
+                case 'status-warning': return 'เฝ้าระวัง';
+                case 'status-normal': return 'ปกติ';
+                default: return 'ไม่มีข้อมูล';
+            }
+        }
+
+        function updateIOPDisplay(iopData) {
+            const iopRightEl = document.getElementById('iopRight');
+            const iopLeftEl = document.getElementById('iopLeft');
+            const targetIOPEl = document.getElementById('targetIOP');
+            const lastCheckEl = document.getElementById('lastCheck');
+            const statusRightEl = document.getElementById('statusRight');
+            const statusLeftEl = document.getElementById('statusLeft');
+            
+            if (!iopData || iopData.length === 0) {
+                iopRightEl.textContent = '--';
+                iopLeftEl.textContent = '--';
+                targetIOPEl.textContent = '--';
+                lastCheckEl.textContent = '--';
+                lastCheckEl.nextElementSibling.textContent = 'ยังไม่มีข้อมูล';
+                statusRightEl.className = 'iop-status status-normal';
+                statusRightEl.textContent = 'ไม่มีข้อมูล';
+                statusLeftEl.className = 'iop-status status-normal';
+                statusLeftEl.textContent = 'ไม่มีข้อมูล';
+                return;
+            }
+
+            const latest = iopData.sort((a,b) => new Date(b.measurement_date) - new Date(a.measurement_date))[0];
+            
+            // Get target IOP from treatment plan
+            const targetIOP = selectedPatient.treatmentPlan?.target_iop_right || 
+                             selectedPatient.treatmentPlan?.target_iop_left || 21;
+
+            iopRightEl.textContent = latest.right_eye_iop !== null ? latest.right_eye_iop : '--';
+            iopLeftEl.textContent = latest.left_eye_iop !== null ? latest.left_eye_iop : '--';
+            targetIOPEl.textContent = targetIOP;
+
+            const rightStatusClass = getIOPStatusClass(latest.right_eye_iop, targetIOP);
+            const leftStatusClass = getIOPStatusClass(latest.left_eye_iop, targetIOP);
+
+            statusRightEl.className = `iop-status ${rightStatusClass}`;
+            statusRightEl.textContent = getIOPStatusText(rightStatusClass);
+            statusLeftEl.className = `iop-status ${leftStatusClass}`;
+            statusLeftEl.textContent = getIOPStatusText(leftStatusClass);
+
+            if (latest.measurement_date) {
+                const lastDate = new Date(latest.measurement_date);
+                const today = new Date();
+                const diffTime = Math.abs(today - lastDate);
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                
+                lastCheckEl.textContent = lastDate.toLocaleDateString('th-TH');
+                lastCheckEl.nextElementSibling.textContent = `${diffDays} วันที่แล้ว`;
+            } else {
+                lastCheckEl.textContent = '--';
+                lastCheckEl.nextElementSibling.textContent = 'ยังไม่มีข้อมูล';
+            }
+        }
+        
+        function getEmptyIOPCardsHTML(loading = false) {
+            if (loading) {
+                return `<div class="loading" style="grid-column: 1 / -1;"><i class="fas fa-spinner"></i> กำลังโหลดค่า IOP...</div>`;
+            }
+            return `
+                <div class="iop-card">
+                    <div class="iop-label">IOP ตาขวา</div>
+                    <div class="iop-value" id="iopRight">--</div>
+                    <div class="iop-unit">mmHg</div>
+                    <div class="iop-status status-normal" id="statusRight">ไม่มีข้อมูล</div>
+                </div>
+                <div class="iop-card">
+                    <div class="iop-label">IOP ตาซ้าย</div>
+                    <div class="iop-value" id="iopLeft">--</div>
+                    <div class="iop-unit">mmHg</div>
+                    <div class="iop-status status-normal" id="statusLeft">ไม่มีข้อมูล</div>
+                </div>
+                <div class="iop-card">
+                    <div class="iop-label">Target IOP</div>
+                    <div class="iop-value" id="targetIOP">--</div>
+                    <div class="iop-unit">mmHg</div>
+                    <div class="iop-status status-normal">ไม่มีข้อมูล</div>
+                </div>
+                <div class="iop-card">
+                    <div class="iop-label">วันที่ตรวจล่าสุด</div>
+                    <div class="iop-value" style="font-size: 1.5rem;" id="lastCheck">--</div>
+                    <div class="iop-unit">วันที่แล้ว</div>
+                    <div class="iop-status status-normal">ยังไม่มีข้อมูล</div>
+                </div>
+            `;
+        }
+
+        function getEmptyChartHTML(chartName, loading = false) {
+            if (loading) {
+                return `<div class="loading"><i class="fas fa-spinner"></i> กำลังโหลดกราฟ ${chartName}...</div>`;
+            }
+            return `
+                <div class="empty-state">
+                    <i class="fas fa-chart-line"></i>
+                    <h3>ไม่มีข้อมูลแสดงผล</h3>
+                    <p>เลือกผู้ป่วยเพื่อดูกราฟแนวโน้มค่า ${chartName}</p>
+                </div>`;
+        }
+
+        function loadIOPChart(iopData) {
+            const chartContainer = document.getElementById('iopChart');
+            if (!iopData || iopData.length === 0) {
+                chartContainer.innerHTML = getEmptyChartHTML('IOP');
+                if (iopChartInstance) {
+                    iopChartInstance.destroy();
+                    iopChartInstance = null;
+                }
+                return;
+            }
+
+            if (typeof Chart === 'undefined') {
+                chartContainer.innerHTML = `<div class="empty-state"><i class="fas fa-exclamation-triangle"></i><h3>Chart library not loaded.</h3><p>Unable to display IOP chart.</p></div>`;
+                console.error("Chart.js is not loaded.");
+                return;
+            }
+            
+            chartContainer.innerHTML = '<canvas id="iopChartCanvas"></canvas>';
+            const ctx = document.getElementById('iopChartCanvas').getContext('2d');
+
+            const sortedData = iopData.sort((a, b) => new Date(a.measurement_date) - new Date(b.measurement_date));
+            const labels = sortedData.map(d => new Date(d.measurement_date).toLocaleDateString('th-TH', { month: 'short', day: 'numeric' }));
+            const iopRightValues = sortedData.map(d => d.right_eye_iop);
+            const iopLeftValues = sortedData.map(d => d.left_eye_iop);
+            
+            // Get target IOP
+            const targetIOP = selectedPatient.treatmentPlan?.target_iop_right || 
+                             selectedPatient.treatmentPlan?.target_iop_left || 21;
+            const targetIOPValues = sortedData.map(() => targetIOP);
+
+            if (iopChartInstance) {
+                iopChartInstance.destroy();
+            }
+
+            iopChartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'IOP ตาขวา (mmHg)',
+                            data: iopRightValues,
+                            borderColor: '#e74c3c',
+                            backgroundColor: 'rgba(231, 76, 60, 0.1)',
+                            tension: 0.1,
+                            fill: false,
+                            spanGaps: true
+                        },
+                        {
+                            label: 'IOP ตาซ้าย (mmHg)',
+                            data: iopLeftValues,
+                            borderColor: '#3498db',
+                            backgroundColor: 'rgba(52, 152, 219, 0.1)',
+                            tension: 0.1,
+                            fill: false,
+                            spanGaps: true
+                        },
+                        {
+                            label: 'Target IOP (mmHg)',
+                            data: targetIOPValues,
+                            borderColor: '#00CECE',
+                            backgroundColor: 'rgba(0, 206, 206, 0.1)',
+                            borderDash: [5, 5],
+                            tension: 0.1,
+                            fill: false,
+                            spanGaps: true
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            title: { display: true, text: 'IOP (mmHg)' }
+                        },
+                        x: {
+                            title: { display: true, text: 'วันที่ตรวจ' }
+                        }
+                    },
+                    plugins: {
+                        legend: { position: 'top' },
+                        tooltip: { mode: 'index', intersect: false }
+                    }
+                }
+            });
+        }
+
+        function addIOPRecord() {
+            if (!selectedPatient) {
+                showError('กรุณาเลือกผู้ป่วยก่อนเพิ่มค่า IOP');
+                return;
+            }
+            const modal = document.getElementById('iopEntryModal');
+            const form = document.getElementById('iopEntryForm');
+            form.reset();
+            
+            // Pre-fill date and time
+            const now = new Date();
+            form.measurementDate.value = now.toISOString().split('T')[0];
+            form.measurementTime.value = now.toTimeString().split(' ')[0].substring(0,5);
+            
+            modal.classList.add('show');
+        }
+
+        function closeIOPEntryModal() {
+            document.getElementById('iopEntryModal').classList.remove('show');
+        }
+
+        async function submitIOPEntry(event) {
+            event.preventDefault();
+            if (!selectedPatient) {
+                showError('ไม่พบข้อมูลผู้ป่วย');
+                return;
+            }
+            
+            const formData = new FormData(event.target);
+            const data = Object.fromEntries(formData.entries());
+            
+            // Convert to proper format for API
+            const iopData = {
+                measurementDate: data.measurementDate,
+                measurementTime: data.measurementTime,
+                leftEyeIOP: parseFloat(data.leftEyeIOP),
+                rightEyeIOP: parseFloat(data.rightEyeIOP),
+                measurementDevice: data.measurementDevice || null,
+                measurementMethod: data.measurementMethod,
+                notes: data.notes || null
+            };
+
+            try {
+                await apiCall(`/patients/${selectedPatient.patient_id}/iop-measurements`, {
+                    method: 'POST',
+                    body: JSON.stringify(iopData)
+                });
+                
+                showSuccess('บันทึกค่า IOP เรียบร้อยแล้ว');
+                closeIOPEntryModal();
+                loadIOPData(selectedPatient.patient_id);
+            } catch (error) {
+                showError('ไม่สามารถบันทึกค่า IOP ได้: ' + error.message);
+            }
+        }
+
+        function refreshIOPData() {
+            if (selectedPatient) {
+                loadIOPData(selectedPatient.patient_id);
+            } else {
+                showError('กรุณาเลือกผู้ป่วยก่อน');
+            }
+        }
+
+        function exportIOPChart() {
+            if (!iopChartInstance) {
+                showError('ไม่มีกราฟให้ส่งออก');
+                return;
+            }
+            const image = iopChartInstance.toBase64Image();
+            const link = document.createElement('a');
+            link.href = image;
+            link.download = `iop_chart_${selectedPatient ? selectedPatient.hn || selectedPatient.patient_id : 'export'}.png`;
+            link.click();
+            showSuccess('ส่งออกกราฟ IOP สำเร็จ');
+        }
+
+        // Medication Tracking Functions
+        async function loadMedicationData(patientId) {
+            const medicationGrid = document.getElementById('medicationGrid');
+            medicationGrid.innerHTML = `<div class="loading" style="grid-column: 1 / -1;"><i class="fas fa-spinner"></i> กำลังโหลดข้อมูลยา...</div>`;
+            
+            try {
+                const medications = await apiCall(`/patients/${patientId}/medications`);
+
+                if (!medications || medications.length === 0) {
+                    medicationGrid.innerHTML = getEmptyMedicationHTML();
+                    return;
+                }
+                
+                let html = '';
+                medications.forEach(med => {
+                    let statusClass = 'status-sufficient';
+                    let statusText = 'ใช้อยู่';
+                    let statusIcon = 'fa-check-circle';
+                    
+                    if (med.status === 'discontinued') {
+                        statusClass = 'status-out';
+                        statusText = 'หยุดใช้แล้ว';
+                        statusIcon = 'fa-times-circle';
+                    } else if (med.end_date && new Date(med.end_date) < new Date()) {
+                        statusClass = 'status-out';
+                        statusText = 'หมดอายุ';
+                        statusIcon = 'fa-times-circle';
+                    }
+
+                    html += `
+                        <div class="medication-card">
+                            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1.5rem;">
+                                <div>
+                                    <h4 style="font-size: 1.3rem; font-weight: 700; color: var(--primary); margin-bottom: 0.5rem;">${med.medication_name}</h4>
+                                    <p style="color: var(--gray); font-size: 1rem; font-weight: 500;">${med.dosage} - ${med.frequency}</p>
+                                </div>
+                                <span style="background: var(--secondary); color: var(--white); padding: 0.5rem 1rem; border-radius: 25px; font-size: 0.85rem; font-weight: 600;">${med.category || 'ยาหยอดตา'}</span>
+                            </div>
+                            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 1.5rem;">
+                                <div style="text-align: center; padding: 1rem; background: rgba(255, 255, 255, 0.7); border-radius: var(--radius-sm); border: 1px solid rgba(50, 64, 71, 0.05);">
+                                    <div style="font-size: 0.8rem; color: var(--gray); font-weight: 600; text-transform: uppercase; margin-bottom: 0.5rem;">ตา</div>
+                                    <div style="font-size: 1.1rem; font-weight: 700; color: var(--dark);">${med.eye === 'both' ? 'ทั้งสองข้าง' : med.eye === 'left' ? 'ซ้าย' : 'ขวา'}</div>
+                                </div>
+                                <div style="text-align: center; padding: 1rem; background: rgba(255, 255, 255, 0.7); border-radius: var(--radius-sm); border: 1px solid rgba(50, 64, 71, 0.05);">
+                                    <div style="font-size: 0.8rem; color: var(--gray); font-weight: 600; text-transform: uppercase; margin-bottom: 0.5rem;">เริ่มใช้</div>
+                                    <div style="font-size: 1.1rem; font-weight: 700; color: var(--dark);">${new Date(med.start_date).toLocaleDateString('th-TH')}</div>
+                                </div>
+                                <div style="text-align: center; padding: 1rem; background: rgba(255, 255, 255, 0.7); border-radius: var(--radius-sm); border: 1px solid rgba(50, 64, 71, 0.05);">
+                                    <div style="font-size: 0.8rem; color: var(--gray); font-weight: 600; text-transform: uppercase; margin-bottom: 0.5rem;">สั่งจ่ายโดย</div>
+                                    <div style="font-size: 1.1rem; font-weight: 700; color: var(--dark);">${med.prescribed_by || 'N/A'}</div>
+                                </div>
+                            </div>
+                            <div style="display: flex; align-items: center; justify-content: center; gap: 0.5rem; padding: 0.75rem 1.5rem; border-radius: 25px; font-weight: 600; margin-top: 1rem; background: rgba(39, 174, 96, 0.1); color: var(--success); border: 2px solid rgba(39, 174, 96, 0.3);" class="${statusClass}">
+                                <i class="fas ${statusIcon}"></i>
+                                ${statusText}
+                            </div>
+                        </div>
+                    `;
+                });
+                medicationGrid.innerHTML = html;
+
+            } catch (error) {
+                showError('ไม่สามารถโหลดข้อมูลยาได้');
+                medicationGrid.innerHTML = getEmptyMedicationHTML();
+            }
+        }
+        
+        function getEmptyMedicationHTML() {
+            return `
+                <div class="empty-state" style="grid-column: 1 / -1;">
+                    <i class="fas fa-pills"></i>
+                    <h3>ไม่มีข้อมูลยา</h3>
+                    <p>เลือกผู้ป่วยเพื่อดูข้อมูลการใช้ยา</p>
+                </div>`;
+        }
+
+        function addMedicationRecord() {
+            if (!selectedPatient) { 
+                showError('กรุณาเลือกผู้ป่วยก่อน'); 
+                return; 
+            }
+            showToast('ฟังก์ชัน "เพิ่มยา" อยู่ระหว่างการพัฒนา', 'info');
+        }
+
+        function updateMedicationStatus() {
+            if (!selectedPatient) { 
+                showError('กรุณาเลือกผู้ป่วยก่อน'); 
+                return; 
+            }
+            showToast('ฟังก์ชัน "อัปเดตสถานะยา" อยู่ระหว่างการพัฒนา', 'info');
+        }
+
+        // Surgery Functions
+        async function loadSurgeryHistory(patientId) {
+            const surgeryHistoryContainer = document.getElementById('surgeryHistory');
+            surgeryHistoryContainer.innerHTML = `<div class="loading"><i class="fas fa-spinner"></i> กำลังโหลดประวัติการผ่าตัด...</div>`;
+            
+            try {
+                const surgeries = await apiCall(`/patients/${patientId}/surgeries`);
+
+                if (!surgeries || surgeries.length === 0) {
+                    surgeryHistoryContainer.innerHTML = getEmptySurgeryHistoryHTML();
+                    return;
+                }
+
+                let html = '';
+                surgeries.sort((a,b) => new Date(b.surgery_date) - new Date(a.surgery_date)).forEach(s => {
+                    html += `
+                        <div class="surgery-record">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                                <span style="font-size: 1.1rem; font-weight: 700; color: var(--primary);">${new Date(s.surgery_date).toLocaleDateString('th-TH')}</span>
+                                <span style="background: var(--info); color: var(--white); padding: 0.25rem 0.75rem; border-radius: 15px; font-size: 0.8rem; font-weight: 600;">${s.surgery_type} (${s.eye === 'both' ? 'ทั้งสองตา' : s.eye === 'left' ? 'ตาซ้าย' : 'ตาขวา'})</span>
+                            </div>
+                            <div style="color: var(--gray); line-height: 1.6; margin-bottom: 1rem;">
+                                <p><strong>รายละเอียด:</strong> ${s.procedure_details || 'ไม่มี'}</p>
+                                <p><strong>ผลลัพธ์:</strong> ${s.outcome || 'N/A'} <strong>ภาวะแทรกซ้อน:</strong> ${s.complications || 'ไม่มี'}</p>
+                                ${s.surgeon_name ? `<p><strong>ผู้ผ่าตัด:</strong> ${s.surgeon_name}</p>` : ''}
+                            </div>
+                            <div style="display: flex; gap: 0.75rem;">
+                                <button style="background: transparent; border: 2px solid var(--secondary); color: var(--secondary); border-radius: var(--radius-sm); padding: 0.5rem 1rem; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: var(--transition);" onclick="viewSurgeryDetail('${s.surgery_id}')">
+                                    <i class="fas fa-eye"></i> ดูรายละเอียด
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                });
+                surgeryHistoryContainer.innerHTML = html;
+
+            } catch (error) {
+                showError('ไม่สามารถโหลดประวัติการผ่าตัดได้');
+                surgeryHistoryContainer.innerHTML = getEmptySurgeryHistoryHTML();
+            }
+        }
+        
+        function getEmptySurgeryHistoryHTML() {
+            return `
+                <div class="empty-state">
+                    <i class="fas fa-procedures"></i>
+                    <h3>ยังไม่มีประวัติการผ่าตัด</h3>
+                    <p>เลือกผู้ป่วยและบันทึกข้อมูลการผ่าตัดใหม่</p>
+                </div>`;
+        }
+
+        function viewSurgeryDetail(surgeryId) {
+            showToast('ฟังก์ชันดูรายละเอียดการผ่าตัดอยู่ระหว่างการพัฒนา', 'info');
+        }
+
+        function addSurgeryRecord() {
+            if (!selectedPatient) { 
+                showError('กรุณาเลือกผู้ป่วยก่อน'); 
+                return; 
+            }
+            clearSurgeryForm();
+            document.getElementById('surgeryForm').surgeryDate.focus();
+            showToast('กรอกข้อมูลการผ่าตัดใหม่', 'info');
+        }
+
+        function clearSurgeryForm() {
+            const form = document.getElementById('surgeryForm');
+            form.reset();
+            // Pre-fill date
+            form.surgeryDate.value = new Date().toISOString().split('T')[0];
+        }
+
+        async function submitSurgeryForm(event) {
+            event.preventDefault();
+            if (!selectedPatient) {
+                showError('กรุณาเลือกผู้ป่วยก่อนบันทึก');
+                return;
+            }
+
+            const formData = new FormData(event.target);
+            const data = Object.fromEntries(formData.entries());
+            
+            // Convert to proper format for API
+            const surgeryData = {
+                surgeryDate: data.surgeryDate,
+                surgeryType: data.surgeryType,
+                eye: data.eye,
+                preOpIOPLeft: data.preOpIOPLeft ? parseFloat(data.preOpIOPLeft) : null,
+                preOpIOPRight: data.preOpIOPRight ? parseFloat(data.preOpIOPRight) : null,
+                procedureDetails: data.procedureDetails || null,
+                complications: data.complications || 'none',
+                outcome: data.outcome || 'pending',
+                notes: data.notes || null
+            };
+
+            try {
+                await apiCall(`/patients/${selectedPatient.patient_id}/surgeries`, {
+                    method: 'POST',
+                    body: JSON.stringify(surgeryData)
+                });
+                
+                showSuccess('บันทึกข้อมูลการผ่าตัดเรียบร้อยแล้ว');
+                clearSurgeryForm();
+                loadSurgeryHistory(selectedPatient.patient_id);
+            } catch (error) {
+                showError('ไม่สามารถบันทึกข้อมูลการผ่าตัดได้: ' + error.message);
+            }
+        }
+
+        // Alerts Functions
+        async function loadAlerts() {
+            const alertsListContainer = document.getElementById('alertsList');
+            const alertCountEl = document.getElementById('alertCount');
+            alertsListContainer.innerHTML = `<div class="loading"><i class="fas fa-spinner"></i> กำลังโหลดการแจ้งเตือน...</div>`;
+            
+            try {
+                const alerts = await apiCall('/adherence-alerts');
+
+                if (!alerts || alerts.length === 0) {
+                    alertsListContainer.innerHTML = getEmptyAlertsHTML();
+                    alertCountEl.textContent = '0';
+                    return;
+                }
+                
+                const pendingAlerts = alerts.filter(a => a.status === 'pending');
+                alertCountEl.textContent = pendingAlerts.length;
+                
+                let html = '';
+                alerts.forEach(alert => {
+                    let alertClass = 'alert-low';
+                    let alertIcon = 'fa-info-circle';
+                    
+                    if (alert.severity === 'high') {
+                        alertClass = 'alert-high';
+                        alertIcon = 'fa-exclamation-triangle';
+                    } else if (alert.severity === 'medium') {
+                        alertClass = 'alert-medium';
+                        alertIcon = 'fa-exclamation-circle';
+                    }
+
+                      html += `
+                        <div class="alert-item ${alertClass}" style="${alert.status === 'resolved' ? 'opacity:0.7;' : ''}">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <div style="flex: 1;">
+                                    <div style="font-weight: 600; margin-bottom: 0.5rem;">
+                                        <i class="fas ${alertIcon}"></i> 
+                                        ${alert.patient_name ? `ผู้ป่วย: ${alert.patient_name}` : 'การแจ้งเตือนทั่วไป'}
+                                    </div>
+                                    <div style="color: var(--gray); font-size: 0.9rem;">
+                                        ${alert.message} - ${new Date(alert.alert_date).toLocaleString('th-TH')}
+                                    </div>
+                                </div>
+                                <div style="display: flex; gap: 0.75rem;">
+                                    ${alert.status === 'pending' ? `<button style="background: var(--success); color: var(--white); border: none; border-radius: var(--radius-sm); padding: 0.5rem 1rem; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: var(--transition);" onclick="resolveAlert('${alert.alert_id}')">แก้ไขแล้ว</button>` : ''}
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+                alertsListContainer.innerHTML = html;
+
+            } catch (error) {
+                showError('ไม่สามารถโหลดการแจ้งเตือนได้');
+                alertsListContainer.innerHTML = getEmptyAlertsHTML();
+                alertCountEl.textContent = '0';
+            }
+        }
+        
+        function getEmptyAlertsHTML() {
+            return `
+                <div class="empty-state">
+                    <i class="fas fa-bell-slash"></i>
+                    <h3>ไม่มีการแจ้งเตือน</h3>
+                    <p>ยังไม่มีการแจ้งเตือนในขณะนี้</p>
+                </div>`;
+        }
+
+        async function resolveAlert(alertId) {
+            try {
+                await apiCall(`/adherence-alerts/${alertId}/resolve`, {
+                    method: 'PUT',
+                    body: JSON.stringify({ resolutionNotes: 'แก้ไขจาก Monitoring System' })
+                });
+                
+                showSuccess('แก้ไขการแจ้งเตือนแล้ว');
+                loadAlerts();
+            } catch (error) {
+                showError('ไม่สามารถอัปเดตการแจ้งเตือนได้');
+            }
+        }
+
+        function refreshAlerts() {
+            loadAlerts();
+        }
+
+        async function markAllAsRead() {
+            try {
+                const alerts = await apiCall('/adherence-alerts?status=pending');
+                
+                for (const alert of alerts) {
+                    await apiCall(`/adherence-alerts/${alert.alert_id}/resolve`, {
+                        method: 'PUT',
+                        body: JSON.stringify({ resolutionNotes: 'อ่านทั้งหมดจาก Monitoring System' })
+                    });
+                }
+                
+                showSuccess('การแจ้งเตือนทั้งหมดถูกทำเครื่องหมายว่าอ่านแล้ว');
+                loadAlerts();
+            } catch (error) {
+                showError('ไม่สามารถอัปเดตการแจ้งเตือนทั้งหมดได้');
+            }
+        }
+
+        // Helper Functions
+        function calculateAge(dateOfBirth) {
+            if (!dateOfBirth) return 'N/A';
+            const birthDate = new Date(dateOfBirth);
+            const today = new Date();
+            let age = today.getFullYear() - birthDate.getFullYear();
+            const m = today.getMonth() - birthDate.getMonth();
+            if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+                age--;
+            }
+            return age;
+        }
+
+        function getGenderText(gender) {
+            if (gender === 'male') return 'ชาย';
+            if (gender === 'female') return 'หญิง';
+            return 'ไม่ระบุ';
+        }
+        
+        function createToastContainer() {
+            let container = document.getElementById('toastContainer');
+            if (!container) {
+                container = document.createElement('div');
+                container.id = 'toastContainer';
+                container.style.cssText = `
+                    position: fixed;
+                    bottom: 20px;
+                    right: 20px;
+                    z-index: 10000;
+                    display: flex;
+                    flex-direction: column-reverse;
+                    gap: 10px;
+                `;
+                document.body.appendChild(container);
+            }
+            return container;
+        }
+        
+        function showToast(message, type = 'info') {
+            const toastContainer = createToastContainer();
+            const toast = document.createElement('div');
+            toast.className = `toast toast-${type}`;
+            
+            const iconMap = {
+                'success': 'fa-check-circle',
+                'error': 'fa-exclamation-triangle',
+                'info': 'fa-info-circle',
+                'warning': 'fa-exclamation-circle'
+            };
+            
+            toast.innerHTML = `<i class="fas ${iconMap[type]}"></i> ${message}`;
+            
+            toastContainer.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.classList.add('show');
+            }, 10); 
+
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => {
+                    if (toast.parentNode) {
+                         toast.remove();
+                    }
+                }, 500);
+            }, 3000 + (toastContainer.children.length * 200));
+        }
+
+        function showSuccess(message) { 
+            showToast(message, 'success'); 
+            console.log("Success:", message); 
+        }
+        
+        function showError(message) { 
+            showToast(message, 'error'); 
+            console.error("Error:", message); 
+        }
+
+        let loadingOverlayEl = null;
+        function showLoadingOverlay(message = 'กำลังประมวลผล...') {
+            if (!loadingOverlayEl) {
+                loadingOverlayEl = document.createElement('div');
+                loadingOverlayEl.style.cssText = `
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    background-color: rgba(0, 0, 0, 0.6);
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    z-index: 99999;
+                    color: white;
+                    font-size: 1.3rem;
+                    text-align: center;
+                    backdrop-filter: blur(5px);
+                `;
+                document.body.appendChild(loadingOverlayEl);
+            }
+            loadingOverlayEl.innerHTML = `<i class="fas fa-spinner fa-spin" style="margin-right: 12px; font-size: 1.5em;"></i> ${message}`;
+            loadingOverlayEl.style.display = 'flex';
+        }
+
+        function hideLoadingOverlay() {
+            if (loadingOverlayEl) {
+                loadingOverlayEl.style.display = 'none';
+            }
+        }
+
+        // Chart period change handler
+        function updateChartPeriod() {
+            if (selectedPatient) {
+                loadIOPData(selectedPatient.patient_id);
+            }
+        }
+
+        // Event Listeners & Initialization
+        document.addEventListener('DOMContentLoaded', () => {
+            // Check authentication
+            if (!checkAuth()) {
+                return;
+            }
+
+            initializeTabs();
+            updateSelectedPatientDisplay();
+
+            // Modal Search
+            document.getElementById('modalSearchInput').addEventListener('input', (e) => {
+                const searchTerm = e.target.value.toLowerCase();
+                const filteredPatients = allPatients.filter(p =>
+                    (p.first_name && p.first_name.toLowerCase().includes(searchTerm)) ||
+                    (p.last_name && p.last_name.toLowerCase().includes(searchTerm)) ||
+                    (p.hn && p.hn.toLowerCase().includes(searchTerm))
+                );
+                displayModalPatients(filteredPatients);
+            });
+
+            // Chart period selector
+            document.getElementById('chartPeriod').addEventListener('change', updateChartPeriod);
+
+            // Form Submissions
+            document.getElementById('iopEntryForm').addEventListener('submit', submitIOPEntry);
+            document.getElementById('surgeryForm').addEventListener('submit', submitSurgeryForm);
+            
+            // Initial tab content display
+            document.querySelectorAll('.tab-content').forEach(content => {
+                if (!content.classList.contains('active')) {
+                    content.style.display = 'none';
+                } else {
+                    content.style.display = 'block';
+                    if (!selectedPatient) {
+                        showEmptyStateForTab(content.id);
+                    }
+                }
+            });
+            
+            // Modal close on background click
+            document.querySelectorAll('.modal').forEach(modal => {
+                modal.addEventListener('click', (e) => {
+                    if (e.target === modal) {
+                        modal.classList.remove('show');
+                    }
+                });
+            });
+
+            // Check if Chart.js is available
+            if (typeof Chart === 'undefined') {
+                console.warn("Chart.js library is not loaded. Charts will not be available.");
+                const chartContainers = document.querySelectorAll('.chart-body');
+                chartContainers.forEach(cc => {
+                    cc.innerHTML = `<div class="empty-state"><i class="fas fa-exclamation-triangle"></i><h3>Chart library missing</h3><p>ไม่สามารถแสดงกราฟได้เนื่องจาก Chart.js ไม่ได้ถูกโหลด</p></div>`;
+                });
+            }
+
+            // Load initial alerts
+            loadAlerts();
+
+            console.log('✅ Monitoring System initialized successfully');
+        });
+
+        // Auto-refresh alerts every 5 minutes
+        setInterval(() => {
+            if (currentTab === 'alerts') {
+                loadAlerts();
+            }
+        }, 5 * 60 * 1000);
+
+        // Auto-refresh IOP data every 10 minutes if patient is selected
+        setInterval(() => {
+            if (selectedPatient && currentTab === 'iop-tracking') {
+                loadIOPData(selectedPatient.patient_id);
+            }
+        }, 10 * 60 * 1000);
+
+    </script>
+</body>
+</html>
